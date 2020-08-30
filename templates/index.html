@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Enregistreur de télévision numérique{% endblock %}
+{% block title %}Programmation d'un enregistrement{% endblock %}
 
 {% block styles %}
 {{ super() }}
@@ -13,56 +13,63 @@
 {% endblock %}
 
 {% block page_content %}
-<form method="POST" action="{{ url("index") }}" role="form">
-    <div class="form-group">
-        {{ form.channel.label(for="channel") }}
-        {{ form.channel(class="form-control") }}
-        {% if form.channel.errors %}
-        <div class="help-text">
-            {% for error in form.channel.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-        {% endif %}
+<div class="container">
+    <div class="row">
+        <h1>Programmation d'un enregistrement</h1>
     </div>
-    <div class="form-group{% if form.program_name.errors %} has-error{% endif %}">
-        {{ form.program_name.label(for="program_name") }}
-        {{ form.program_name(class="form-control") }}
-        {% if form.program_name.errors %}
-        <div class="help-text">
-            {% for error in form.program_name.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-        {% endif %}
+    <div class="row">
+        <form method="POST" action="{{ url("index") }}" role="form">
+            <div class="form-group">
+                {{ form.channel.label(for="channel") }}
+                {{ form.channel(class="form-control") }}
+                {% if form.channel.errors %}
+                <div class="help-text">
+                    {% for error in form.channel.errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="form-group{% if form.program_name.errors %} has-error{% endif %}">
+                {{ form.program_name.label(for="program_name") }}
+                {{ form.program_name(class="form-control") }}
+                {% if form.program_name.errors %}
+                <div class="help-text">
+                    {% for error in form.program_name.errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.immediate() }}
+                {{ form.immediate.label(for="opened") }}
+            </div>
+            <div class="form-group{% if form.begin_date.errors %} has-error{% endif %}">
+                {{ form.begin_date.label(for="begin_date") }}
+                {% if form.begin_date.data is none %}
+                <input id="begin_date" name="begin_date" width="100%" placeholder="Entrez la date de début de l'enregistrement" />
+                {% else %}
+                <input id="begin_date" name="begin_date" width="100%" value="{{ form.begin_date.data.strftime("%d-%m-%Y %H:%M") }}" />
+                {% endif %}
+                <div class="help-text">
+                    {% for error in form.begin_date.errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+            </div>
+            <div class="form-group{% if form.end_date.errors %} has-error{% endif %}">
+                {{ form.end_date.label(for="end_date") }}
+                {% if form.end_date.data is none %}
+                <input id="end_date" name="end_date" width="100%" placeholder="Entrez la date de fin de l'enregistrement" />
+                {% else %}
+                <input id="end_date" name="end_date" width="100%" value="{{ form.end_date.data.strftime("%d-%m-%Y %H:%M") }}" />
+                {% endif %}
+                <div class="help-text">
+                    {% for error in form.end_date.errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+            </div>
+            <div>
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url("index") }}" class="btn btn-light">Annuler</a>
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        {{ form.immediate() }}
-        {{ form.immediate.label(for="opened") }}
-    </div>
-    <div class="form-group{% if form.begin_date.errors %} has-error{% endif %}">
-        {{ form.begin_date.label(for="begin_date") }}
-        {% if form.begin_date.data is none %}
-        <input id="begin_date" name="begin_date" width="100%" placeholder="Entrez la date de début de l'enregistrement" />
-        {% else %}
-        <input id="begin_date" name="begin_date" width="100%" value="{{ form.begin_date.data.strftime("%d-%m-%Y %H:%M") }}" />
-        {% endif %}
-        <div class="help-text">
-            {% for error in form.begin_date.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-    </div>
-    <div class="form-group{% if form.end_date.errors %} has-error{% endif %}">
-        {{ form.end_date.label(for="end_date") }}
-        {% if form.end_date.data is none %}
-        <input id="end_date" name="end_date" width="100%" placeholder="Entrez la date de fin de l'enregistrement" />
-        {% else %}
-        <input id="end_date" name="end_date" width="100%" value="{{ form.end_date.data.strftime("%d-%m-%Y %H:%M") }}" />
-        {% endif %}
-        <div class="help-text">
-            {% for error in form.end_date.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-    </div>
-    <div>
-        {{ form.submit(class="btn btn-primary") }}
-        <a href="{{ url("index") }}" class="btn btn-light">Annuler</a>
-    </div>
-</form>
+</div>
 
 <script>
     $('#begin_date').datetimepicker({

@@ -49,7 +49,6 @@ def record(channel, program_name, begin_date, end_date):
     loop.call_at(ref_time + starting_delay, create_recording_task, loop, channel, program_filename, duration)
 
 
-
 @routes.view("/", name="index")
 @aiohttp_jinja2.template("index.html")
 class IndexView(web.View):
@@ -77,30 +76,41 @@ class IndexView(web.View):
         self.channels_choices = list(enumerate(get_channels()))
 
     async def post(self):
-        # form = RecordForm(await self.request.post(), meta=await generate_csrf_meta(self.request))
-        form = RecordForm(await self.request.post())
+        # form = self.RecordForm(await self.request.post(), meta=await generate_csrf_meta(self.request))
+        form = self.RecordForm(await self.request.post())
         form.channel.choices = self.channels_choices
         if form.validate():
             data = remove_special_data(form.data)
             begin_date = data["begin_date"]
             end_date = data["end_date"]
+
+            error = False
+            if begin_date <= datetime.now():
+                error = True
+                message = "La date de début doit être dans le futur."
             if begin_date >= end_date:
-                flash(
-                    self.request, (
-                        "danger",
-                        "La date de début doit être antérieure à la date de fin."
-                    )
+                error = True
+                message = "La date de début doit être antérieure à la date de fin."
+            if error:
+                flash( self.request, ( "danger", message))
+            else:
+                channel = self.channels_choices[data["channel"]][1]
+                program_name = data["program_name"]
+                record(channel, program_name, begin_date, end_date)
+                message = (
+                    f"L'enregistrement de \"{program_name}\" est programmé "
+                    f"pour le {begin_date.strftime('%d/%m/%Y')} à "
+                    f"{begin_date.strftime('%H:%M')} sur {channel}."
                 )
-            channel = self.channels_choices[data["channel"]][1]
-            program_name = data["program_name"]
-            record(channel, program_name, begin_date, end_date)
+                flash(self.request, ("info", message))
+                return web.HTTPFound(self.request.app.router["index"].url_for())
         else:
             flash(self.request, ("danger", "Le formulaire contient des erreurs."))
         return {"form": form}
 
     async def get(self,):
         # form = RecordForm(meta=await generate_csrf_meta(self.request))
-        form = RecordForm()
+        form = self.RecordForm()
         form.channel.choices = self.channels_choices
         return {"form": form}
 
