@@ -20,6 +20,15 @@
     <div class="row">
         <form method="POST" action="{{ url("index") }}" role="form">
             <div class="form-group">
+                {{ form.adapter.label(for="adapter") }}
+                {{ form.adapter(class="form-control") }}
+                {% if form.adapter.errors %}
+                <div class="help-text">
+                    {% for error in form.adapter.errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
                 {{ form.channel.label(for="channel") }}
                 {{ form.channel(class="form-control") }}
                 {% if form.channel.errors %}

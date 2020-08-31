@@ -42,12 +42,15 @@ class Recorder:
         channels = [l.split(':', 1)[0] for l in lines]
         return channels
 
-    def create_recording_task(self, loop, channel, program_filename, duration):
-        command = f"/usr/bin/gnutv -channels {self.channels_conf} -out file {program_filename} -timeout {duration} \"{channel}\""
+    def create_recording_task(self, loop, adapter, channel, program_filename, duration):
+        command = (
+            f"/usr/bin/gnutv -adapter {adapter} -channels {self.channels_conf} "
+            f"-out file {program_filename} -timeout {duration} \"{channel}\""
+        )
         process = asyncio.create_subprocess_shell(command)
         loop.create_task(process)
 
-    def record(self, channel, program_name, begin_date, end_date, duration):
+    def record(self, adapter, channel, program_name, begin_date, end_date, duration):
         loop = asyncio.get_running_loop()
         ref_time = loop.time()
         starting_delay = (begin_date - datetime.now()).total_seconds()
@@ -56,6 +59,7 @@ class Recorder:
             ref_time + starting_delay,
             self.create_recording_task,
             loop,
+            adapter,
             channel,
             program_filename,
             duration
@@ -68,6 +72,7 @@ class IndexView(web.View):
 
     # class RecordForm(CsrfForm):
     class RecordForm(Form):
+        adapter = SelectField("Adaptateur", coerce=int)
         channel = SelectField("Chaîne", coerce=int)
         program_name = StringField(
             "Nom du programme",
@@ -91,11 +96,13 @@ class IndexView(web.View):
     def __init__(self, request):
         super().__init__(request)
         self.recorder = request.app.recorder
+        self.adapters_choices = [(i, str(i)) for i in range(self.recorder.dvb_adapter_number)]
         self.channels_choices = list(enumerate(self.recorder.get_channels()))
 
     async def post(self):
         # form = self.RecordForm(await self.request.post(), meta=await generate_csrf_meta(self.request))
         form = self.RecordForm(await self.request.post())
+        form.adapter.choices = self.adapters_choices
         form.channel.choices = self.channels_choices
         if form.validate():
             data = remove_special_data(form.data)
@@ -117,16 +124,18 @@ class IndexView(web.View):
                 error = True
                 message = "La durée de l'enregistrement est trop longue."
             if error:
-                flash( self.request, ( "danger", message))
+                flash(self.request, ("danger", message))
             else:
+                adapter = data["adapter"]
                 channel = self.channels_choices[data["channel"]][1]
                 program_name = data["program_name"]
-                self.recorder.record(channel, program_name, begin_date, end_date, duration)
+                self.recorder.record(adapter, channel, program_name, begin_date, end_date, duration)
                 message = (
                     f"L'enregistrement de \"{program_name}\" est programmé "
                     f"pour le {begin_date.strftime('%d/%m/%Y')} "
                     f"à {begin_date.strftime('%H:%M')} "
-                    f"pendant {round(duration/60)} minutes sur {channel}."
+                    f"pendant {round(duration/60)} minutes du {channel} "
+                    f"sur l'adaptateur {adapter}"
                 )
                 flash(self.request, ("info", message))
                 return web.HTTPFound(self.request.app.router["index"].url_for())
@@ -137,6 +146,7 @@ class IndexView(web.View):
     async def get(self,):
         # form = RecordForm(meta=await generate_csrf_meta(self.request))
         form = self.RecordForm()
+        form.adapter.choices = self.adapters_choices
         form.channel.choices = self.channels_choices
         return {"form": form}
 
