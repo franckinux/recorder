@@ -35,6 +35,7 @@ class Recorder:
         self.max_duration = int(config.get("max_duration", "18000"))
         self.dvb_adapter_number = int(config.get("dvb_adapter_number", "1"))
         self.channels_conf = config.get("channels_conf", "/etc/channels.conf")
+        self.recording_directory = config.get("recording_directory", "/tmp")
 
     def get_channels(self):
         with open(self.channels_conf) as fichier:
@@ -43,9 +44,10 @@ class Recorder:
         return channels
 
     def create_recording_task(self, loop, adapter, channel, program_filename, duration):
+        filename = op.join(self.recording_directory, program_filename)
         command = (
             f"/usr/bin/gnutv -adapter {adapter} -channels {self.channels_conf} "
-            f"-out file {program_filename} -timeout {duration} \"{channel}\""
+            f"-out file {filename} -timeout {duration} \"{channel}\""
         )
         process = asyncio.create_subprocess_shell(command)
         loop.create_task(process)
@@ -134,7 +136,7 @@ class IndexView(web.View):
                     f"L'enregistrement de \"{program_name}\" est programmé "
                     f"pour le {begin_date.strftime('%d/%m/%Y')} "
                     f"à {begin_date.strftime('%H:%M')} "
-                    f"pendant {round(duration/60)} minutes du {channel} "
+                    f"pendant {round(duration/60)} minutes de \"{channel}\" "
                     f"sur l'adaptateur {adapter}"
                 )
                 flash(self.request, ("info", message))
