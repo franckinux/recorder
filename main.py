@@ -8,8 +8,9 @@ from aiohttp_session_flash import flash
 import asyncio
 # import base64
 from datetime import datetime
-from jinja2 import FileSystemLoader
 import os.path as op
+
+from jinja2 import FileSystemLoader
 from wtforms import BooleanField
 from wtforms import DateTimeField
 from wtforms import Form
@@ -22,6 +23,7 @@ from wtforms.validators import DataRequired
 # from csrf_form import CsrfForm
 from error import error_middleware
 # from utils import generate_csrf_meta
+from utils import read_configuration_file
 from utils import remove_special_data
 
 routes = web.RouteTableDef()
@@ -81,26 +83,35 @@ class IndexView(web.View):
         form.channel.choices = self.channels_choices
         if form.validate():
             data = remove_special_data(form.data)
-            begin_date = data["begin_date"]
-            end_date = data["end_date"]
 
             error = False
-            if begin_date <= datetime.now():
-                error = True
-                message = "La date de début doit être dans le futur."
+            begin_date = data["begin_date"]
+            if begin_date is None:
+                begin_date = datetime.now()
+            else:
+                if begin_date <= datetime.now():
+                    error = True
+                    message = "La date de début doit être dans le futur."
+            end_date = data["end_date"]
             if begin_date >= end_date:
                 error = True
                 message = "La date de début doit être antérieure à la date de fin."
+            duration = (end_date - begin_date).total_seconds()
+            if duration > int(self.request.app.config["max_duration"]):
+                error = True
+                message = "La durée de l'enregistrement est trop longue."
             if error:
                 flash( self.request, ( "danger", message))
             else:
                 channel = self.channels_choices[data["channel"]][1]
                 program_name = data["program_name"]
-                record(channel, program_name, begin_date, end_date)
+                record(channel, program_name, begin_date, end_date, duration)
                 message = (
                     f"L'enregistrement de \"{program_name}\" est programmé "
-                    f"pour le {begin_date.strftime('%d/%m/%Y')} à "
-                    f"{begin_date.strftime('%H:%M')} sur {channel}."
+                    f"pour le {begin_date.strftime('%d/%m/%Y')} "
+                    f"à {begin_date.strftime('%H:%M')} "
+                    f"pendant {duration} minutes "
+                    f"sur {channel}."
                 )
                 flash(self.request, ("info", message))
                 return web.HTTPFound(self.request.app.router["index"].url_for())
@@ -116,6 +127,8 @@ class IndexView(web.View):
 
 
 if __name__ == "__main__":
+    config = read_configuration_file()
+
     app = web.Application(middlewares=[error_middleware])
     session_setup(app, SimpleCookieStorage())
     app.middlewares.append(aiohttp_session_flash.middleware)
@@ -130,8 +143,10 @@ if __name__ == "__main__":
     )
     jinja2_env = aiohttp_jinja2.get_env(app)
 
+    app.config = config["magneto"]
+
     app.router.add_routes(routes)
     static_dir = op.join(op.dirname(op.abspath(__file__)), "static")
     app.router.add_static("/static", static_dir)
 
-    web.run_app(app)
+    web.run_app(app, port=int(config["network"]["port"]))
