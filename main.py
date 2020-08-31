@@ -30,25 +30,36 @@ from utils import remove_special_data
 routes = web.RouteTableDef()
 
 
-def get_channels():
-    with open("/etc/channels.conf") as fichier:
-        lignes = fichier.readlines()
-    channels = [l.split(':', 1)[0] for l in lignes]
-    return channels
+class Recorder:
+    def __init__(self, config):
+        self.max_duration = int(config.get("max_duration", "18000"))
+        self.dvb_adapter_number = int(config.get("dvb_adapter_number", "1"))
+        self.channels_conf = config.get("channels_conf", "/etc/channels.conf")
 
+    def get_channels(self):
+        with open(self.channels_conf) as fichier:
+            lines = fichier.readlines()
+        channels = [l.split(':', 1)[0] for l in lines]
+        return channels
 
-def create_recording_task(loop, channel, program_filename, duration):
-    command = f"/usr/bin/gnutv -channels /etc/channels.conf -out file {program_filename} -timeout {duration} \"{channel}\""
-    process = asyncio.create_subprocess_shell(command)
-    loop.create_task(process)
+    def create_recording_task(self, loop, channel, program_filename, duration):
+        command = f"/usr/bin/gnutv -channels {self.channels_conf} -out file {program_filename} -timeout {duration} \"{channel}\""
+        process = asyncio.create_subprocess_shell(command)
+        loop.create_task(process)
 
-
-def record(channel, program_name, begin_date, end_date, duration):
-    loop = asyncio.get_running_loop()
-    ref_time = loop.time()
-    starting_delay = (begin_date - datetime.now()).total_seconds()
-    program_filename = program_name.replace(' ', '-') + ".ts"
-    loop.call_at(ref_time + starting_delay, create_recording_task, loop, channel, program_filename, duration)
+    def record(self, channel, program_name, begin_date, end_date, duration):
+        loop = asyncio.get_running_loop()
+        ref_time = loop.time()
+        starting_delay = (begin_date - datetime.now()).total_seconds()
+        program_filename = program_name.replace(' ', '-') + ".ts"
+        loop.call_at(
+            ref_time + starting_delay,
+            self.create_recording_task,
+            loop,
+            channel,
+            program_filename,
+            duration
+        )
 
 
 @routes.view("/", name="index")
@@ -79,7 +90,8 @@ class IndexView(web.View):
 
     def __init__(self, request):
         super().__init__(request)
-        self.channels_choices = list(enumerate(get_channels()))
+        self.recorder = request.app.recorder
+        self.channels_choices = list(enumerate(self.recorder.get_channels()))
 
     async def post(self):
         # form = self.RecordForm(await self.request.post(), meta=await generate_csrf_meta(self.request))
@@ -101,7 +113,7 @@ class IndexView(web.View):
                 error = True
                 message = "La date de début doit être antérieure à la date de fin."
             duration = (end_date - begin_date).total_seconds()
-            if duration > int(self.request.app.config["max_duration"]):
+            if duration > int(self.recorder.max_duration):
                 error = True
                 message = "La durée de l'enregistrement est trop longue."
             if error:
@@ -109,13 +121,12 @@ class IndexView(web.View):
             else:
                 channel = self.channels_choices[data["channel"]][1]
                 program_name = data["program_name"]
-                record(channel, program_name, begin_date, end_date, duration)
+                self.recorder.record(channel, program_name, begin_date, end_date, duration)
                 message = (
                     f"L'enregistrement de \"{program_name}\" est programmé "
                     f"pour le {begin_date.strftime('%d/%m/%Y')} "
                     f"à {begin_date.strftime('%H:%M')} "
-                    f"pendant {duration} minutes "
-                    f"sur {channel}."
+                    f"pendant {round(duration/60)} minutes sur {channel}."
                 )
                 flash(self.request, ("info", message))
                 return web.HTTPFound(self.request.app.router["index"].url_for())
@@ -134,6 +145,9 @@ if __name__ == "__main__":
     config = read_configuration_file()
 
     app = web.Application(middlewares=[error_middleware])
+
+    app.recorder = Recorder(config["magneto"])
+
     session_setup(app, SimpleCookieStorage())
     app.middlewares.append(aiohttp_session_flash.middleware)
 
@@ -146,8 +160,6 @@ if __name__ == "__main__":
         )
     )
     jinja2_env = aiohttp_jinja2.get_env(app)
-
-    app.config = config["magneto"]
 
     app.router.add_routes(routes)
     static_dir = op.join(op.dirname(op.abspath(__file__)), "static")
