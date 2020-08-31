@@ -37,10 +37,6 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="form-group">
-                {{ form.immediate() }}
-                {{ form.immediate.label(for="opened") }}
-            </div>
             <div class="form-group{% if form.begin_date.errors %} has-error{% endif %}">
                 {{ form.begin_date.label(for="begin_date") }}
                 {% if form.begin_date.data is none %}

@@ -19,6 +19,7 @@ from wtforms import StringField
 from wtforms import SubmitField
 from wtforms.validators import Length
 from wtforms.validators import DataRequired
+from wtforms.validators import Optional
 
 # from csrf_form import CsrfForm
 from error import error_middleware
@@ -42,10 +43,9 @@ def create_recording_task(loop, channel, program_filename, duration):
     loop.create_task(process)
 
 
-def record(channel, program_name, begin_date, end_date):
+def record(channel, program_name, begin_date, end_date, duration):
     loop = asyncio.get_running_loop()
     ref_time = loop.time()
-    duration = (end_date - begin_date).total_seconds()
     starting_delay = (begin_date - datetime.now()).total_seconds()
     program_filename = program_name.replace(' ', '-') + ".ts"
     loop.call_at(ref_time + starting_delay, create_recording_task, loop, channel, program_filename, duration)
@@ -63,8 +63,12 @@ class IndexView(web.View):
             validators=[DataRequired(), Length(min=5, max=128)],
             render_kw={"placeholder": "Entrez le nom du programme"}
         )
-        immediate = BooleanField("Immédiat", default=False)
-        begin_date = DateTimeField("Date de début", id="begin_date", format="%d-%m-%Y %H:%M")
+        begin_date = DateTimeField(
+            "Date de début",
+            id="begin_date",
+            format="%d-%m-%Y %H:%M",
+            validators=[Optional()]
+        )
         end_date = DateTimeField(
             "Date de fin",
             id="end_date",
