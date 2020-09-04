@@ -11,7 +11,6 @@ from datetime import datetime
 import os.path as op
 
 from jinja2 import FileSystemLoader
-from wtforms import BooleanField
 from wtforms import DateTimeField
 from wtforms import Form
 from wtforms import SelectField
@@ -36,6 +35,7 @@ class Recorder:
         self.dvb_adapter_number = int(config.get("dvb_adapter_number", "1"))
         self.channels_conf = config.get("channels_conf", "/etc/channels.conf")
         self.recording_directory = config.get("recording_directory", "/tmp")
+        self.processes = [None] * self.dvb_adapter_number
 
     def get_channels(self):
         with open(self.channels_conf) as fichier:
@@ -43,14 +43,20 @@ class Recorder:
         channels = [l.split(':', 1)[0] for l in lines]
         return channels
 
-    def create_recording_task(self, loop, adapter, channel, program_filename, duration):
+    async def run_subprocess(self, command, adapter):
+        if self.processes[adapter] is None:
+            process = await asyncio.create_subprocess_shell(command)
+            self.processes[adapter] = process
+            await process.wait()
+            self.processes[adapter] = None
+
+    def make_command_and_run_it(self, loop, adapter, channel, program_filename, duration):
         filename = op.join(self.recording_directory, program_filename)
         command = (
             f"/usr/bin/gnutv -adapter {adapter} -channels {self.channels_conf} "
             f"-out file {filename} -timeout {duration} \"{channel}\""
         )
-        process = asyncio.create_subprocess_shell(command)
-        loop.create_task(process)
+        loop.create_task(self.run_subprocess(command, adapter))
 
     def record(self, adapter, channel, program_name, begin_date, end_date, duration):
         loop = asyncio.get_running_loop()
@@ -59,7 +65,7 @@ class Recorder:
         program_filename = program_name.replace(' ', '-') + ".ts"
         loop.call_at(
             ref_time + starting_delay,
-            self.create_recording_task,
+            self.make_command_and_run_it,
             loop,
             adapter,
             channel,
@@ -74,7 +80,7 @@ class IndexView(web.View):
 
     # class RecordForm(CsrfForm):
     class RecordForm(Form):
-        adapter = SelectField("Adaptateur", coerce=int)
+        adapter = SelectField("Enregistreur", coerce=int)
         channel = SelectField("Chaîne", coerce=int)
         program_name = StringField(
             "Nom du programme",
