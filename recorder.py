@@ -35,7 +35,7 @@ class Recorder:
 
     async def run_subprocess(self, command, adapter, id_):
         if self.processes[adapter]:
-            logger.warning("Enregistreur occupé (id={id_})")
+            logger.warning(f"Enregistreur occupé (id={id_})")
         else:
             logger.debug(command)
             self.processes[adapter] = True
