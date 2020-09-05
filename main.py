@@ -94,7 +94,7 @@ class IndexView(web.View):
                     f"pour le {begin_date.strftime('%d/%m/%Y')} "
                     f"à {begin_date.strftime('%H:%M')} "
                     f"pendant {round(duration/60)} minutes de \"{channel}\" "
-                    f"sur l'adaptateur {adapter}"
+                    f"sur l'enregistreur {adapter}"
                 )
                 flash(self.request, ("info", message))
                 return web.HTTPFound(self.request.app.router["index"].url_for())
@@ -111,11 +111,13 @@ class IndexView(web.View):
 
 
 if __name__ == "__main__":
-    config = read_configuration_file()
+    path = op.dirname(__file__)
+
+    config = read_configuration_file(path)
 
     app = web.Application(middlewares=[error_middleware])
 
-    app.recorder = Recorder(config["magneto"])
+    app.recorder = Recorder(config["magneto"], path)
 
     session_setup(app, SimpleCookieStorage())
     app.middlewares.append(aiohttp_session_flash.middleware)

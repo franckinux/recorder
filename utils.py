@@ -1,9 +1,9 @@
 import configparser
 import os
+import os.path as op
 import sys
 
 # from aiohttp_babel.middlewares import _
-from aiohttp_session import get_session
 # from babel.support import LazyProxy
 
 
@@ -13,13 +13,6 @@ def remove_special_data(dico):
     return dico
 
 
-# async def generate_csrf_meta(request):
-#     return {
-#         "csrf_context": await get_session(request),
-#         "csrf_secret": request.app["config"]["application"]["secret_key"].encode("ascii")
-#     }
-
-
 # def lazy_gettext(s):
 #     return LazyProxy(_, s, enable_cache=False)
 #
@@ -27,10 +20,11 @@ def remove_special_data(dico):
 # _l = lazy_gettext
 
 
-def read_configuration_file():
+def read_configuration_file(path):
+    default_config_filename = op.join(path, "config.ini")
     config = configparser.ConfigParser()
     try:
-        conf_filename = os.environ.get("MAGNETO_CONFIG")
+        conf_filename = os.environ.get("RECORDER_CONFIG", default_config_filename)
         config.read(conf_filename)
     except Exception:
         sys.stderr.write(
@@ -41,8 +35,9 @@ def read_configuration_file():
     return config
 
 
-def write_configuration_file(config):
-    conf_filename = os.environ.get("MAGNETO_CONFIG")
+def write_configuration_file(path, config):
+    default_config_filename = op.join(path, "config.ini")
+    conf_filename = os.environ.get("RECORDER_CONFIG", default_config_filename)
 
     with open(conf_filename, "w") as f:
         config.write(f)
