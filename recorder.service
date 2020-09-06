@@ -1,0 +1,11 @@
+[Unit]
+Description=Dvb recorder
+
+[Service]
+ExecStart=/home/franck/Documents/projets/python/recorder/start.sh
+WorkingDirectory=/home/franck/Documents/projets/python/recorder
+User=franck
+Group=franck
+
+[Install]
+WantedBy=multi-user.target
