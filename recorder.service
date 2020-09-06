@@ -2,8 +2,8 @@
 Description=Dvb recorder
 
 [Service]
-ExecStart=/home/franck/Documents/projets/python/recorder/start.sh
 WorkingDirectory=/home/franck/Documents/projets/python/recorder
+ExecStart=/home/franck/Documents/projets/python/recorder/start.sh
 User=franck
 Group=franck
 
