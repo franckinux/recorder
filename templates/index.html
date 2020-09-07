@@ -68,6 +68,10 @@
                     {% for error in form.end_date.errors %}<p>{{ error }}</p>{% endfor %}
                 </div>
             </div>
+            <div class="form-check">
+                {{ form.shutdown(class="form-check-input") }}
+                {{ form.shutdown.label(for="shutdown") }}
+            </div>
             <div>
                 {{ form.submit(class="btn btn-primary") }}
                 <a href="{{ url("index") }}" class="btn btn-light">Annuler</a>

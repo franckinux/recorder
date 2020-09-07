@@ -8,6 +8,7 @@ from datetime import datetime
 import os.path as op
 
 from jinja2 import FileSystemLoader
+from wtforms import BooleanField
 from wtforms import DateTimeField
 from wtforms import Form
 from wtforms import SelectField
@@ -50,6 +51,7 @@ class IndexView(web.View):
             format="%d-%m-%Y %H:%M",
             validators=[DataRequired()]
         )
+        shutdown = BooleanField("Mise hors tension")
         submit = SubmitField("Valider")
 
     def __init__(self, request):
@@ -86,9 +88,11 @@ class IndexView(web.View):
                 flash(self.request, ("danger", message))
             else:
                 adapter = data["adapter"]
+                shutdown = data["shutdown"]
                 channel = self.channels_choices[data["channel"]][1]
                 program_name = data["program_name"]
-                self.recorder.record(adapter, channel, program_name, begin_date, end_date, duration)
+                self.recorder.record(adapter, channel, program_name,
+                                     begin_date, end_date, duration, shutdown)
                 message = (
                     f"L'enregistrement de \"{program_name}\" est programmé "
                     f"pour le {begin_date.strftime('%d/%m/%Y')} "

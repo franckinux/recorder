@@ -48,6 +48,11 @@ class Recorder:
             logger.debug(f"end recording (id={id_})")
 
             self.processes[adapter] = False
+
+            if self.recordings[id_]["shutdown"]:
+                logger.debug(f"shutdown (id={id_})")
+                process = await asyncio.create_subprocess_shell("shutdown -h now")
+                await process.wait()
         del(self.recordings[id_])
 
     def make_command_and_run_it(self, loop, adapter, channel, program_filename,
@@ -61,7 +66,8 @@ class Recorder:
         )
         loop.create_task(self.run_subprocess(command, adapter, id_))
 
-    def record(self, adapter, channel, program_name, begin_date, end_date, duration):
+    def record(self, adapter, channel, program_name, begin_date, end_date,
+               duration, shutdown):
         logger.info(
             f"Programmation de l'enregistrement de \"{program_name}\" "
             f"pendant {round(duration/60)} minutes de \"{channel}\" "
@@ -86,7 +92,8 @@ class Recorder:
             "channel": channel,
             "program_name": program_name,
             "begin_date": begin_date,
-            "end_date": end_date
+            "end_date": end_date,
+            "shutdown": shutdown
         }
         self.id += 1
 
