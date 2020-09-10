@@ -12,6 +12,11 @@ aiohttp-jinja2 = "*"
 aiohttp-session-flash = "*"
 aiohttp-session = "*"
 cryptography = "*"
+aiohttp-babel = "*"
 
 [requires]
 python_version = "3.8"
+
+[packages.aiohttp_babel]
+git = "https://github.com/jie/aiohttp_babel"
+editable = true

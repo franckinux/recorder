@@ -4,6 +4,7 @@ import logging
 import os
 import os.path as op
 
+from aiohttp_babel.middlewares import _
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class Recorder:
 
     async def run_subprocess(self, command, adapter, id_):
         if self.processes[adapter]:
-            logger.warning(f"Enregistreur occupé (id={id_})")
+            logger.warning(_("Enregistreur occupé (id={})").format(id_))
         else:
             logger.debug(command)
             self.processes[adapter] = True
@@ -43,21 +44,21 @@ class Recorder:
             self.recordings[id_]["handle"] = None
             self.recordings[id_]["process"] = process
 
-            logger.debug(f"start recording (id={id_})")
+            logger.debug(_("Début de l'enregistrement (id={})").format(id_))
             await process.wait()
-            logger.debug(f"end recording (id={id_})")
+            logger.debug(_("Fin de l'enregistrement (id={})").format(id_))
 
             self.processes[adapter] = False
 
             if self.recordings[id_]["shutdown"]:
-                logger.debug(f"shutdown (id={id_})")
+                logger.debug(_("Mise hors tension (id={})").format(id_))
                 process = await asyncio.create_subprocess_shell("shutdown -h now")
                 await process.wait()
         del(self.recordings[id_])
 
     def make_command_and_run_it(self, loop, adapter, channel, program_filename,
                                 duration, id_):
-        logger.info(f"Enregistrement de {program_filename} (id={id_})")
+        logger.info(_("Enregistrement de {} (id={})").format(program_filename, id_))
 
         filename = op.join(self.recording_directory, program_filename)
         command = (
@@ -69,9 +70,10 @@ class Recorder:
     def record(self, adapter, channel, program_name, begin_date, end_date,
                duration, shutdown):
         logger.info(
-            f"Programmation de l'enregistrement de \"{program_name}\" "
-            f"pendant {round(duration/60)} minutes de \"{channel}\" "
-            f"sur l'enregistreur {adapter} (id={self.id})"
+            _(
+                "Programmation de l'enregistrement de \"{}\" "
+                "pendant {} minutes de \"{}\" sur l'enregistreur {} (id={})"
+            ).format(program_name, round(duration / 60, channel, adapter, self.id))
         )
 
         loop = asyncio.get_running_loop()

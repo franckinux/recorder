@@ -1,12 +1,18 @@
+from datetime import datetime
+from functools import partial
+import os.path as op
+
 from aiohttp import web
+from aiohttp_babel.locale import load_gettext_translations
+from aiohttp_babel.locale import set_default_locale
+from aiohttp_babel.locale import set_locale_detector
+from aiohttp_babel.middlewares import _
+from aiohttp_babel.middlewares import babel_middleware
 import aiohttp_jinja2
 from aiohttp_session import setup as session_setup
 from aiohttp_session import SimpleCookieStorage
 import aiohttp_session_flash
 from aiohttp_session_flash import flash
-from datetime import datetime
-import os.path as op
-
 from jinja2 import FileSystemLoader
 from wtforms import BooleanField
 from wtforms import DateTimeField
@@ -20,10 +26,26 @@ from wtforms.validators import Optional
 
 from error import error_middleware
 from recorder import Recorder
+from utils import _l
 from utils import read_configuration_file
 from utils import remove_special_data
 
 routes = web.RouteTableDef()
+
+DEFAULT_LANGUAGE = "fr"
+
+
+def locale_detector(request, locale):
+    return locale
+
+
+def setup_i18n(path, locale):
+    set_default_locale(DEFAULT_LANGUAGE)
+    locales_dir = op.join(path, "locales", "translations")
+    load_gettext_translations(locales_dir, "messages")
+
+    partial_locale_detector = partial(locale_detector, locale=locale)
+    set_locale_detector(partial_locale_detector)
 
 
 @routes.view("/", name="index")
@@ -32,27 +54,27 @@ class IndexView(web.View):
 
     # class RecordForm(CsrfForm):
     class RecordForm(Form):
-        adapter = SelectField("Enregistreur", coerce=int)
-        channel = SelectField("Chaîne", coerce=int)
+        adapter = SelectField(_l("Enregistreur"), coerce=int)
+        channel = SelectField(_l("Chaîne"), coerce=int)
         program_name = StringField(
-            "Nom du programme",
+            _l("Nom du programme"),
             validators=[DataRequired(), Length(min=5, max=128)],
-            render_kw={"placeholder": "Entrez le nom du programme"}
+            render_kw={"placeholder": _l("Entrez le nom du programme")}
         )
         begin_date = DateTimeField(
-            "Date de début",
+            _l("Date de début"),
             id="begin_date",
             format="%d-%m-%Y %H:%M",
             validators=[Optional()]
         )
         end_date = DateTimeField(
-            "Date de fin",
+            _l("Date de fin"),
             id="end_date",
             format="%d-%m-%Y %H:%M",
             validators=[DataRequired()]
         )
-        shutdown = BooleanField("Mise hors tension")
-        submit = SubmitField("Valider")
+        shutdown = BooleanField(_l("Mise hors tension"))
+        submit = SubmitField(_l("Valider"))
 
     def __init__(self, request):
         super().__init__(request)
@@ -61,7 +83,6 @@ class IndexView(web.View):
         self.channels_choices = list(enumerate(self.recorder.get_channels()))
 
     async def post(self):
-        # form = self.RecordForm(await self.request.post(), meta=await generate_csrf_meta(self.request))
         form = self.RecordForm(await self.request.post())
         form.adapter.choices = self.adapters_choices
         form.channel.choices = self.channels_choices
@@ -75,15 +96,15 @@ class IndexView(web.View):
             else:
                 if begin_date <= datetime.now():
                     error = True
-                    message = "La date de début doit être dans le futur."
+                    message = _("La date de début doit être dans le futur.")
             end_date = data["end_date"]
             if begin_date >= end_date:
                 error = True
-                message = "La date de début doit être antérieure à la date de fin."
+                message = _("La date de début doit être antérieure à la date de fin.")
             duration = (end_date - begin_date).total_seconds()
             if duration > int(self.recorder.max_duration):
                 error = True
-                message = "La durée de l'enregistrement est trop longue."
+                message = _("La durée de l'enregistrement est trop longue.")
             if error:
                 flash(self.request, ("danger", message))
             else:
@@ -93,21 +114,22 @@ class IndexView(web.View):
                 program_name = data["program_name"]
                 self.recorder.record(adapter, channel, program_name,
                                      begin_date, end_date, duration, shutdown)
-                message = (
-                    f"L'enregistrement de \"{program_name}\" est programmé "
-                    f"pour le {begin_date.strftime('%d/%m/%Y')} "
-                    f"à {begin_date.strftime('%H:%M')} "
-                    f"pendant {round(duration/60)} minutes de \"{channel}\" "
-                    f"sur l'enregistreur {adapter}"
+                message = _(
+                    "L'enregistrement de \"{}\" est programmé "
+                    "pour le {} à {} pendant {} minutes de \"{}\" "
+                    "sur l'enregistreur {}"
+                ).format(
+                    program_name, begin_date.strftime("%d/%m/%Y"),
+                    begin_date.strftime("%H:%M"), round(duration / 60),
+                    channel, adapter
                 )
                 flash(self.request, ("info", message))
                 return web.HTTPFound(self.request.app.router["index"].url_for())
         else:
-            flash(self.request, ("danger", "Le formulaire contient des erreurs."))
+            flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
         return {"form": form}
 
     async def get(self,):
-        # form = RecordForm(meta=await generate_csrf_meta(self.request))
         form = self.RecordForm()
         form.adapter.choices = self.adapters_choices
         form.channel.choices = self.channels_choices
@@ -115,18 +137,21 @@ class IndexView(web.View):
 
 
 if __name__ == "__main__":
-    path = op.dirname(__file__)
+    path = op.dirname(op.abspath(__file__))
 
     config = read_configuration_file(path)
 
-    app = web.Application(middlewares=[error_middleware])
+    lang = config["recorder"].get("language", DEFAULT_LANGUAGE)
+    setup_i18n(path, lang)
 
-    app.recorder = Recorder(config["magneto"], path)
+    app = web.Application(middlewares=[error_middleware, babel_middleware])
+
+    app.recorder = Recorder(config["recorder"], path)
 
     session_setup(app, SimpleCookieStorage())
     app.middlewares.append(aiohttp_session_flash.middleware)
 
-    template_dir = op.join(op.dirname(op.abspath(__file__)), "templates")
+    template_dir = op.join(path, "templates")
     aiohttp_jinja2.setup(
         app,
         loader=FileSystemLoader(template_dir),
@@ -135,6 +160,7 @@ if __name__ == "__main__":
         )
     )
     jinja2_env = aiohttp_jinja2.get_env(app)
+    jinja2_env.globals['_'] = _
 
     app.router.add_routes(routes)
     static_dir = op.join(op.dirname(op.abspath(__file__)), "static")

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Programmation d'un enregistrement{% endblock %}
+{% block title %}{{ _("Programmation d'un enregistrement") }}{% endblock %}
 
 {% block styles %}
 {{ super() }}
@@ -15,7 +15,7 @@
 {% block page_content %}
 <div class="container">
     <div class="row">
-        <h1>Programmation d'un enregistrement</h1>
+        <h1>{{ _("Programmation d'un enregistrement") }}</h1>
     </div>
     <div class="row">
         <form method="POST" action="{{ url("index") }}" role="form">
@@ -49,7 +49,7 @@
             <div class="form-group{% if form.begin_date.errors %} has-error{% endif %}">
                 {{ form.begin_date.label(for="begin_date") }}
                 {% if form.begin_date.data is none %}
-                <input id="begin_date" name="begin_date" width="100%" placeholder="Entrez la date de début de l'enregistrement" />
+                <input id="begin_date" name="begin_date" width="100%" placeholder="{{ _("Entrez la date de début") }}" />
                 {% else %}
                 <input id="begin_date" name="begin_date" width="100%" value="{{ form.begin_date.data.strftime("%d-%m-%Y %H:%M") }}" />
                 {% endif %}
@@ -60,7 +60,7 @@
             <div class="form-group{% if form.end_date.errors %} has-error{% endif %}">
                 {{ form.end_date.label(for="end_date") }}
                 {% if form.end_date.data is none %}
-                <input id="end_date" name="end_date" width="100%" placeholder="Entrez la date de fin de l'enregistrement" />
+                <input id="end_date" name="end_date" width="100%" placeholder="{{ _("Entrez la date de fin") }}"  />
                 {% else %}
                 <input id="end_date" name="end_date" width="100%" value="{{ form.end_date.data.strftime("%d-%m-%Y %H:%M") }}" />
                 {% endif %}
@@ -74,7 +74,7 @@
             </div>
             <div>
                 {{ form.submit(class="btn btn-primary") }}
-                <a href="{{ url("index") }}" class="btn btn-light">Annuler</a>
+                <a href="{{ url("index") }}" class="btn btn-light">{{ _("Annuler") }}</a>
             </div>
         </form>
     </div>

@@ -3,21 +3,20 @@ import os
 import os.path as op
 import sys
 
-# from aiohttp_babel.middlewares import _
-# from babel.support import LazyProxy
+from aiohttp_babel.middlewares import _
+from babel.support import LazyProxy
 
 
 def remove_special_data(dico):
-    # del dico["csrf_token"]
     del dico["submit"]
     return dico
 
 
-# def lazy_gettext(s):
-#     return LazyProxy(_, s, enable_cache=False)
-#
-#
-# _l = lazy_gettext
+def lazy_gettext(s):
+    return LazyProxy(_, s, enable_cache=False)
+
+
+_l = lazy_gettext
 
 
 def read_configuration_file(path):
