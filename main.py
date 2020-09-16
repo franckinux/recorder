@@ -48,11 +48,17 @@ def setup_i18n(path, locale):
     set_locale_detector(partial_locale_detector)
 
 
+@aiohttp_jinja2.template("index.html")
+async def cancel_recording(request):
+    id_ = int(request.match_info["id"])
+    request.app.recorder.cancel_recording(id_)
+    return web.HTTPFound(request.app.router["index"].url_for())
+
+
 @routes.view("/", name="index")
 @aiohttp_jinja2.template("index.html")
 class IndexView(web.View):
 
-    # class RecordForm(CsrfForm):
     class RecordForm(Form):
         adapter = SelectField(_l("Enregistreur"), coerce=int)
         channel = SelectField(_l("Chaîne"), coerce=int)
@@ -129,13 +135,13 @@ class IndexView(web.View):
                 return web.HTTPFound(self.request.app.router["index"].url_for())
         else:
             flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
-        return {"form": form}
+        return {"form": form, "recordings": self.recorder.recordings}
 
     async def get(self,):
         form = self.RecordForm()
         form.adapter.choices = self.adapters_choices
         form.channel.choices = self.channels_choices
-        return {"form": form}
+        return {"form": form, "recordings": self.recorder.recordings}
 
 
 if __name__ == "__main__":
@@ -163,6 +169,9 @@ if __name__ == "__main__":
     )
     jinja2_env = aiohttp_jinja2.get_env(app)
     jinja2_env.globals['_'] = _
+
+    app.router.add_get("/recording/cancel/{id:\d+}/", cancel_recording,
+                       name="cancel_recording")
 
     app.router.add_routes(routes)
     static_dir = op.join(op.dirname(op.abspath(__file__)), "static")

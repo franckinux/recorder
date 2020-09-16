@@ -17,6 +17,7 @@ class Recorder:
         self.recording_directory = config.get("recording_directory", "/tmp")
         self.processes = [False] * self.dvb_adapter_number
         self.recordings = {}
+        self.simulate = eval(config.get("simulate", "False"))
 
         default_log_filename = op.join(path, "recorder.log")
         log_filename = os.environ.get("RECORDER_LOG", default_log_filename)
@@ -61,10 +62,13 @@ class Recorder:
         logger.info(_("Enregistrement de {} (id={})").format(program_filename, id_))
 
         filename = op.join(self.recording_directory, program_filename)
-        command = (
-            f"/usr/bin/gnutv -adapter {adapter} -channels {self.channels_conf} "
-            f"-out file {filename} -timeout {duration} \"{channel}\""
-        )
+        if self.simulate:
+            command = f"sleep {duration}"
+        else:
+            command = (
+                f"/usr/bin/gnutv -adapter {adapter} -channels {self.channels_conf} "
+                f"-out file {filename} -timeout {duration} \"{channel}\""
+            )
         loop.create_task(self.run_subprocess(command, adapter, id_))
 
     def record(self, adapter, channel, program_name, immediate,
@@ -73,7 +77,7 @@ class Recorder:
             _(
                 "Programmation de l'enregistrement de \"{}\" "
                 "pendant {} minutes de \"{}\" sur l'enregistreur {} (id={})"
-            ).format(program_name, round(duration / 60, channel, adapter, self.id))
+            ).format(program_name, round(duration / 60), channel, adapter, self.id)
         )
 
         loop = asyncio.get_running_loop()
@@ -106,6 +110,7 @@ class Recorder:
             "program_name": program_name,
             "begin_date": begin_date,
             "end_date": end_date,
+            "adapter": adapter,
             "shutdown": shutdown
         }
         self.id += 1
@@ -115,10 +120,13 @@ class Recorder:
 
     def cancel_recording(self, id_):
         if id_ in self.recordings:
+            logger.info(_("Annulation de {} (id={})").format(self.recordings[id_]["program_name"], id_))
+
             handle = self.recordings[id_]["handle"]
             if handle is not None:
                 handle.cancel()
+                del(self.recordings[id_])
+
             process = self.recordings[id_]["process"]
             if process is not None:
                 process.terminate()
-            del(self.recordings[id_])

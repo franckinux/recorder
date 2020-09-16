@@ -92,7 +92,7 @@ msgstr "Recording of {} (id={})"
 
 #: recorder.py:73
 msgid "Programmation de l'enregistrement de \"{}\" pendant {} minutes de \"{}\" sur l'enregistreur {} (id={})"
-msgstr "Scheduling of recording of  \"{}\" during {} minutes of \"{}\" on recorder {} (id={})"
+msgstr "Scheduling of recording of \"{}\" during {} minutes on \"{}\" from recorder {} (id={})"
 
 #: templates/index.html:2 templates/index.html:18
 msgid "Programmation d'un enregistrement"

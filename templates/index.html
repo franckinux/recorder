@@ -80,6 +80,40 @@
     </div>
 </div>
 
+<div class="container">
+    <div class="row">
+        <h1>{{ _("Liste des enregistrements") }}</h1>
+    </div>
+    <div class="row">
+        <table class="table">
+        <thead>
+            <tr>
+                <td>{{ _("Nom du programme") }}</td>
+                <td>{{ _("Chaîne") }}</td>
+                <td>{{ _("Date de début") }}</td>
+                <td>{{ _("Date de fin") }}</td>
+                <td>{{ _("Adaptateur") }}</td>
+                <td>{{ _("Extinction") }}</td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for id, rec in recordings.items() %}
+            <tr>
+                <td>{{ rec.program_name }}</td>
+                <td>{{ rec.channel }}</td>
+                <td>{{ rec.begin_date.strftime("%d/%m/%Y %H:%M") }}</td>
+                <td>{{ rec.end_date.strftime("%d/%m/%Y %H:%M") }}</td>
+                <td>{{ rec.adapter }}</td>
+                <td>{{ rec.shutdown }}</td>
+                <td><a href="{{ url("cancel_recording", id=id) }}">{{ _("Annuler") }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </p>
+    </div>
+</div>
+
 <script>
     $('#begin_date').datetimepicker({
         format: "dd-mm-yyyy HH:MM",
