@@ -92,8 +92,10 @@ class IndexView(web.View):
             error = False
             begin_date = data["begin_date"]
             if begin_date is None:
+                immediate = True
                 begin_date = datetime.now()
             else:
+                immediate = False
                 if begin_date <= datetime.now():
                     error = True
                     message = _("La date de début doit être dans le futur.")
@@ -112,7 +114,7 @@ class IndexView(web.View):
                 shutdown = data["shutdown"]
                 channel = self.channels_choices[data["channel"]][1]
                 program_name = data["program_name"]
-                self.recorder.record(adapter, channel, program_name,
+                self.recorder.record(adapter, channel, program_name, immediate,
                                      begin_date, end_date, duration, shutdown)
                 message = _(
                     "L'enregistrement de \"{}\" est programmé "

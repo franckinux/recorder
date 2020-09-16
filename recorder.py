@@ -67,8 +67,8 @@ class Recorder:
         )
         loop.create_task(self.run_subprocess(command, adapter, id_))
 
-    def record(self, adapter, channel, program_name, begin_date, end_date,
-               duration, shutdown):
+    def record(self, adapter, channel, program_name, immediate,
+               begin_date, end_date, duration, shutdown):
         logger.info(
             _(
                 "Programmation de l'enregistrement de \"{}\" "
@@ -78,16 +78,27 @@ class Recorder:
 
         loop = asyncio.get_running_loop()
         program_filename = program_name.replace(' ', '-') + ".ts"
-        handle = loop.call_later(
-            (begin_date - datetime.now()).total_seconds(),
-            self.make_command_and_run_it,
-            loop,
-            adapter,
-            channel,
-            program_filename,
-            duration,
-            self.id
-        )
+        if immediate:
+            handle = loop.call_soon(
+                self.make_command_and_run_it,
+                loop,
+                adapter,
+                channel,
+                program_filename,
+                duration,
+                self.id
+            )
+        else:
+            handle = loop.call_later(
+                (begin_date - datetime.now()).total_seconds(),
+                self.make_command_and_run_it,
+                loop,
+                adapter,
+                channel,
+                program_filename,
+                duration,
+                self.id
+            )
         self.recordings[self.id] = {
             "handle": handle,
             "process": None,
