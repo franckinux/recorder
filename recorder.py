@@ -53,7 +53,7 @@ class Recorder:
 
             if self.recordings[id_]["shutdown"]:
                 logger.debug(_("Mise hors tension (id={})").format(id_))
-                process = await asyncio.create_subprocess_shell("shutdown -h now")
+                process = await asyncio.create_subprocess_shell("sudo shutdown -h now")
                 await process.wait()
         del(self.recordings[id_])
 
