@@ -44,7 +44,7 @@ msgstr "End date"
 
 #: main.py:82 templates/index.html:101
 msgid "Extinction"
-msgstr ""
+msgstr "Shutdown"
 
 #: main.py:83
 msgid "Valider"
@@ -100,7 +100,7 @@ msgstr "Cancellation of {} (id={})"
 
 #: templates/index.html:2 templates/index.html:29
 msgid "Programmation d'un enregistrement"
-msgstr "Shedule a recording"
+msgstr "Schedule a recording"
 
 #: templates/index.html:20
 msgid "Programmation"
@@ -124,5 +124,5 @@ msgstr "Cancel"
 
 #: templates/index.html:92
 msgid "Liste des enregistrements"
-msgstr ""
+msgstr "List of recordings"
 
