@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-09-10 10:52+0200\n"
+"POT-Creation-Date: 2020-09-17 10:46+0200\n"
 "PO-Revision-Date: 2020-09-09 22:13+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,95 +18,111 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: main.py:57
+#: main.py:63 templates/index.html:100
 msgid "Enregistreur"
 msgstr "Recorder"
 
-#: main.py:58
+#: main.py:64 templates/index.html:97
 msgid "Chaîne"
 msgstr "Channel"
 
-#: main.py:60
+#: main.py:66 templates/index.html:96
 msgid "Nom du programme"
 msgstr "Program name"
 
-#: main.py:62
+#: main.py:68
 msgid "Entrez le nom du programme"
 msgstr "Enter program name"
 
-#: main.py:65
+#: main.py:71 templates/index.html:98
 msgid "Date de début"
 msgstr "Begin date"
 
-#: main.py:71
+#: main.py:77 templates/index.html:99
 msgid "Date de fin"
 msgstr "End date"
 
-#: main.py:76
-msgid "Mise hors tension"
-msgstr "Shutdown"
+#: main.py:82 templates/index.html:101
+msgid "Extinction"
+msgstr ""
 
-#: main.py:77
+#: main.py:83
 msgid "Valider"
 msgstr "Validate"
 
-#: main.py:99
+#: main.py:107
 msgid "La date de début doit être dans le futur."
 msgstr "Begin date must be in the future."
 
-#: main.py:103
+#: main.py:111
 msgid "La date de début doit être antérieure à la date de fin."
 msgstr "Begin date must be anterior to end date."
 
-#: main.py:107
+#: main.py:115
 msgid "La durée de l'enregistrement est trop longue."
 msgstr "Recording is too long."
 
-#: main.py:117
+#: main.py:125
 msgid "L'enregistrement de \"{}\" est programmé pour le {} à {} pendant {} minutes de \"{}\" sur l'enregistreur {}"
 msgstr "Recording of \"{}\" is scheduled from {} to {} during {} minutes on \"{}\" on recorder {}"
 
-#: main.py:129
+#: main.py:137
 msgid "Le formulaire contient des erreurs."
 msgstr "The form contains some errors."
 
-#: recorder.py:39
+#: recorder.py:40
 msgid "Enregistreur occupé (id={})"
 msgstr "Recorder busy (id={})"
 
-#: recorder.py:47
+#: recorder.py:48
 msgid "Début de l'enregistrement (id={})"
 msgstr "Start of recording (id={})"
 
-#: recorder.py:49
+#: recorder.py:50
 msgid "Fin de l'enregistrement (id={})"
 msgstr "End of recording (id={})"
 
-#: recorder.py:54
+#: recorder.py:55
 msgid "Mise hors tension (id={})"
 msgstr "Shutdown (id={})"
 
-#: recorder.py:61
+#: recorder.py:62
 msgid "Enregistrement de {} (id={})"
 msgstr "Recording of {} (id={})"
 
-#: recorder.py:73
+#: recorder.py:77
 msgid "Programmation de l'enregistrement de \"{}\" pendant {} minutes de \"{}\" sur l'enregistreur {} (id={})"
 msgstr "Scheduling of recording of \"{}\" during {} minutes on \"{}\" from recorder {} (id={})"
 
-#: templates/index.html:2 templates/index.html:18
+#: recorder.py:123
+msgid "Annulation de {} (id={})"
+msgstr "Cancellation of {} (id={})"
+
+#: templates/index.html:2 templates/index.html:29
 msgid "Programmation d'un enregistrement"
 msgstr "Shedule a recording"
 
-#: templates/index.html:52
+#: templates/index.html:20
+msgid "Programmation"
+msgstr "Schedule"
+
+#: templates/index.html:23
+msgid "Liste"
+msgstr "List"
+
+#: templates/index.html:61
 msgid "Entrez la date de début"
 msgstr "Enter begin date"
 
-#: templates/index.html:63
+#: templates/index.html:72
 msgid "Entrez la date de fin"
 msgstr "Enter end date"
 
-#: templates/index.html:77
+#: templates/index.html:86 templates/index.html:114
 msgid "Annuler"
 msgstr "Cancel"
+
+#: templates/index.html:92
+msgid "Liste des enregistrements"
+msgstr ""
 
