@@ -79,7 +79,7 @@ class IndexView(web.View):
             format="%d-%m-%Y %H:%M",
             validators=[DataRequired()]
         )
-        shutdown = BooleanField(_l("Mise hors tension"))
+        shutdown = BooleanField(_l("Extinction"))
         submit = SubmitField(_l("Valider"))
 
     def __init__(self, request):

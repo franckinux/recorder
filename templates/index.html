@@ -13,11 +13,20 @@
 {% endblock %}
 
 {% block page_content %}
+
 <div class="container">
-    <div class="row">
-        <h1>{{ _("Programmation d'un enregistrement") }}</h1>
-    </div>
-    <div class="row">
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" data-toggle="tab" href="#schedule" role="tab" aria-controls="schedule" aria-selected="true">{{ _("Programmation") }}</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#list" role="tab" aria-controls="list" aria-selected="false">{{ _("Liste") }} </a>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+    <div id="schedule" class="tab-pane fade show active" role="tabpanel" aria-labelledby="schedule-tab">
+        <h2>{{ _("Programmation d'un enregistrement") }}</h2>
         <form method="POST" action="{{ url("index") }}" role="form">
             <div class="form-group">
                 {{ form.adapter.label(for="adapter") }}
@@ -78,13 +87,9 @@
             </div>
         </form>
     </div>
-</div>
 
-<div class="container">
-    <div class="row">
-        <h1>{{ _("Liste des enregistrements") }}</h1>
-    </div>
-    <div class="row">
+    <div id="list" class="tab-pane fade" role="tabpanel" aria-labelledby="list-tab">
+        <h2>{{ _("Liste des enregistrements") }}</h2>
         <table class="table">
         <thead>
             <tr>
@@ -92,7 +97,7 @@
                 <td>{{ _("Chaîne") }}</td>
                 <td>{{ _("Date de début") }}</td>
                 <td>{{ _("Date de fin") }}</td>
-                <td>{{ _("Adaptateur") }}</td>
+                <td>{{ _("Enregistreur") }}</td>
                 <td>{{ _("Extinction") }}</td>
                 <td></td>
             </tr>
@@ -110,8 +115,9 @@
             </tr>
             {% endfor %}
         </tbody>
-        </p>
+        </table>
     </div>
+  </div>
 </div>
 
 <script>
