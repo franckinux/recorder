@@ -29,6 +29,7 @@ from recorder import Recorder
 from utils import _l
 from utils import read_configuration_file
 from utils import remove_special_data
+from utils import set_language
 
 routes = web.RouteTableDef()
 
@@ -46,6 +47,14 @@ def setup_i18n(path, locale):
 
     partial_locale_detector = partial(locale_detector, locale=locale)
     set_locale_detector(partial_locale_detector)
+
+
+async def cleanup(app):
+    app.recorder.save()
+
+
+async def startup(app):
+    app.recorder.load()
 
 
 @aiohttp_jinja2.template("index.html")
@@ -150,6 +159,7 @@ if __name__ == "__main__":
     config = read_configuration_file(path)
 
     lang = config["recorder"].get("language", DEFAULT_LANGUAGE)
+    set_language(lang)
     setup_i18n(path, lang)
 
     app = web.Application(middlewares=[error_middleware, babel_middleware])
@@ -176,5 +186,8 @@ if __name__ == "__main__":
     app.router.add_routes(routes)
     static_dir = op.join(op.dirname(op.abspath(__file__)), "static")
     app.router.add_static("/static", static_dir)
+
+    app.on_startup.append(startup)
+    app.on_cleanup.append(cleanup)
 
     web.run_app(app, port=int(config["network"]["port"]))

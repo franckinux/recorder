@@ -4,3 +4,4 @@ channels.conf
 __pycache__
 *.ts
 *.log
+*.bin

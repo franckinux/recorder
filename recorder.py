@@ -3,10 +3,15 @@ from datetime import datetime
 import logging
 import os
 import os.path as op
+import pickle
 
 from aiohttp_babel.middlewares import _
 
+from utils import set_locale
+
 logger = logging.getLogger(__name__)
+
+RECORDINGS_FILENAME = "recordings.bin"
 
 
 class Recorder:
@@ -18,6 +23,7 @@ class Recorder:
         self.processes = [False] * self.dvb_adapter_number
         self.recordings = {}
         self.simulate = eval(config.get("simulate", "False"))
+        self.recordings_filename = op.join(path, RECORDINGS_FILENAME)
 
         default_log_filename = op.join(path, "recorder.log")
         log_filename = os.environ.get("RECORDER_LOG", default_log_filename)
@@ -61,10 +67,10 @@ class Recorder:
                                 duration, id_):
         logger.info(_("Enregistrement de {} (id={})").format(program_filename, id_))
 
-        filename = op.join(self.recording_directory, program_filename)
         if self.simulate:
             command = f"sleep {duration}"
         else:
+            filename = op.join(self.recording_directory, program_filename)
             command = (
                 f"/usr/bin/gnutv -adapter {adapter} -channels {self.channels_conf} "
                 f"-out file {filename} -timeout {duration} \"{channel}\""
@@ -111,22 +117,64 @@ class Recorder:
             "begin_date": begin_date,
             "end_date": end_date,
             "adapter": adapter,
-            "shutdown": shutdown
+            "shutdown": shutdown,
+            "duration": duration
         }
         self.id += 1
 
-    def get_recordings(self):
-        return self.recordings
-
     def cancel_recording(self, id_):
         if id_ in self.recordings:
-            logger.info(_("Annulation de {} (id={})").format(self.recordings[id_]["program_name"], id_))
+            logger.info(_("Annulation de {} (id={})").format(
+                self.recordings[id_]["program_name"], id_)
+            )
+
+            process = self.recordings[id_]["process"]
+            if process is not None:
+                process.terminate()
 
             handle = self.recordings[id_]["handle"]
             if handle is not None:
                 handle.cancel()
                 del(self.recordings[id_])
 
-            process = self.recordings[id_]["process"]
-            if process is not None:
-                process.terminate()
+    @set_locale
+    def save(self):
+        # only recordings not started
+        recordings = dict(
+            filter(lambda e: e[1]["process"] is None, self.recordings.items())
+        )
+        for v in recordings.values():
+            v["handle"] = None
+
+        with open(self.recordings_filename, "wb") as f:
+            pickle.dump(recordings, f)
+
+    @set_locale
+    def load(self):
+        """This function is executed outsite of a server request
+        so we must simulate what does the babel middleware"""
+
+        try:
+            with open(self.recordings_filename, "rb") as f:
+                rec1 = pickle.load(f)
+        except FileNotFoundError:
+            rec1 = {}
+
+        if len(rec1) != 0:
+            # only recordings not expired
+            now = datetime.now()
+            rec2 = dict(
+                filter(lambda e: e[1]["begin_date"] > now, rec1.items())
+            )
+
+            for r in rec2.values():
+                self.record(
+                    r["adapter"],
+                    r["channel"],
+                    r["program_name"],
+                    False,
+                    r["begin_date"],
+                    r["end_date"],
+                    r["duration"],
+                    r["shutdown"]
+                )

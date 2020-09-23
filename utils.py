@@ -3,8 +3,18 @@ import os
 import os.path as op
 import sys
 
+from aiohttp_babel import locale
 from aiohttp_babel.middlewares import _
+from aiohttp_babel.middlewares import _thread_locals
 from babel.support import LazyProxy
+
+
+_language_code = None
+
+
+def set_language(lang):
+    global _language_code
+    _language_code = lang
 
 
 def remove_special_data(dico):
@@ -17,6 +27,17 @@ def lazy_gettext(s):
 
 
 _l = lazy_gettext
+
+
+def set_locale(function):
+    """This is a decorator that simulates babel middleware behavior. It is
+    useful when the function is not executed in a request handler."""
+
+    def wrapper(*args, **kwargs):
+        _thread_locals.locale = locale.get(_language_code)
+        function(*args, **kwargs)
+
+    return wrapper
 
 
 def read_configuration_file(path):
