@@ -1,7 +1,6 @@
 import asyncio
 from datetime import datetime
 import logging
-import os
 import os.path as op
 import pickle
 
@@ -11,7 +10,8 @@ from utils import set_locale
 
 logger = logging.getLogger(__name__)
 
-RECORDINGS_FILENAME = "recordings.bin"
+RECORDINGS_BIN_FILENAME = "recordings.bin"
+RECORDINGS_LOG_FILENAME = "recordings.log"
 
 
 class Recorder:
@@ -23,10 +23,9 @@ class Recorder:
         self.processes = [False] * self.dvb_adapter_number
         self.recordings = {}
         self.simulate = eval(config.get("simulate", "False"))
-        self.recordings_filename = op.join(path, RECORDINGS_FILENAME)
+        self.recordings_filename = op.join(path, RECORDINGS_BIN_FILENAME)
 
-        default_log_filename = op.join(path, "recorder.log")
-        log_filename = os.environ.get("RECORDER_LOG", default_log_filename)
+        log_filename = op.join(path, RECORDINGS_LOG_FILENAME)
         logger.setLevel(logging.DEBUG)
         file_handler = logging.FileHandler(log_filename)
         formatter = logging.Formatter("%(asctime)s - %(message)s")

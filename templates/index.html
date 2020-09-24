@@ -22,6 +22,9 @@
     <li class="nav-item">
       <a class="nav-link" data-toggle="tab" href="#list" role="tab" aria-controls="list" aria-selected="false">{{ _("Liste") }} </a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#wakeup" role="tab" aria-controls="wakeup" aria-selected="false">{{ _("Réveils") }} </a>
+    </li>
   </ul>
 
   <div class="tab-content">
@@ -117,6 +120,48 @@
         </tbody>
         </table>
     </div>
+
+    <div id="wakeup" class="tab-pane fade" role="tabpanel" aria-labelledby="wakeup-tab">
+        <h2>{{ _("Programmation d'un réveil") }}</h2>
+        <form method="POST" action="{{ url("index") }}" role="form">
+            <div class="form-group{% if form2.wakeup_date.errors %} has-error{% endif %}">
+                {{ form2.wakeup_date.label(for="wakeup_date") }}
+                {% if form2.wakeup_date.data is none %}
+                <input id="wakeup_date" name="wakeup_date" width="100%" placeholder="{{ _("Entrez la date de réveil") }}" />
+                {% else %}
+                <input id="wakeup_date" name="wakeup_date" width="100%" value="{{ form2.wakeup_date.data.strftime("%d-%m-%Y %H:%M") }}" />
+                {% endif %}
+                <div class="help-text">
+                    {% for error in form2.wakeup_date.errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+            </div>
+            <div>
+                {{ form2.submit2(class="btn btn-primary") }}
+                <a href="{{ url("index") }}" class="btn btn-light">{{ _("Annuler") }}</a>
+            </div>
+        </form>
+
+        {% if wakeups %}
+        <h2>{{ _("Liste des réveils") }}</h2>
+        <table class="table">
+        <thead>
+            <tr>
+                <td>{{ _("Date") }}</td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for id, wak in wakeups.items() %}
+            <tr>
+                <td>{{ wak.strftime("%d/%m/%Y %H:%M") }}</td>
+                <td><a href="{{ url("cancel_wakeup", id=id) }}">{{ _("Annuler") }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        {% endif %}
+    </div>
+
   </div>
 </div>
 
@@ -131,6 +176,15 @@
         weekStartDay: 1
     });
     $('#end_date').datetimepicker({
+        format: "dd-mm-yyyy HH:MM",
+        modal: true,
+        footer: true,
+        uiLibrary: "bootstrap4",
+        locale: "fr-fr",
+        minDate: Date.now(),
+        weekStartDay: 1
+    });
+    $('#wakeup_date').datetimepicker({
         format: "dd-mm-yyyy HH:MM",
         modal: true,
         footer: true,

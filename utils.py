@@ -18,8 +18,11 @@ def set_language(lang):
 
 
 def remove_special_data(dico):
-    del dico["submit"]
-    return dico
+    dct = dict(dico)
+    for k in dico.keys():
+        if k.startswith("submit") or k in ["csrf"]:
+            del dct[k]
+    return dct
 
 
 def lazy_gettext(s):
@@ -61,3 +64,11 @@ def write_configuration_file(path, config):
 
     with open(conf_filename, "w") as f:
         config.write(f)
+
+
+def wakeup(date):
+    os.system(f"sudo rtcwake -m no -u -t {date.strftime('%s')}")
+
+
+def cancel_wakeup():
+    os.system("sudo rtcwake -m disable")

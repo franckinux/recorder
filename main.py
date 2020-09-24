@@ -30,6 +30,7 @@ from utils import _l
 from utils import read_configuration_file
 from utils import remove_special_data
 from utils import set_language
+from wakeup import Wakeup
 
 routes = web.RouteTableDef()
 
@@ -51,16 +52,25 @@ def setup_i18n(path, locale):
 
 async def cleanup(app):
     app.recorder.save()
+    app.wakeup.save()
 
 
 async def startup(app):
     app.recorder.load()
+    app.wakeup.load()
 
 
 @aiohttp_jinja2.template("index.html")
 async def cancel_recording(request):
     id_ = int(request.match_info["id"])
     request.app.recorder.cancel_recording(id_)
+    return web.HTTPFound(request.app.router["index"].url_for())
+
+
+@aiohttp_jinja2.template("index.html")
+async def cancel_wakeup(request):
+    id_ = int(request.match_info["id"])
+    request.app.wakeup.cancel_wakeup(id_)
     return web.HTTPFound(request.app.router["index"].url_for())
 
 
@@ -91,9 +101,19 @@ class IndexView(web.View):
         shutdown = BooleanField(_l("Extinction"))
         submit = SubmitField(_l("Valider"))
 
+    class WakeupForm(Form):
+        wakeup_date = DateTimeField(
+            _l("Date de réveil"),
+            id="wakeup_date",
+            format="%d-%m-%Y %H:%M",
+            validators=[DataRequired()]
+        )
+        submit2 = SubmitField(_l("Valider"))
+
     def __init__(self, request):
         super().__init__(request)
         self.recorder = request.app.recorder
+        self.wakeup = request.app.wakeup
         self.adapters_choices = [(i, str(i)) for i in range(self.recorder.dvb_adapter_number)]
         self.channels_choices = list(enumerate(self.recorder.get_channels()))
 
@@ -101,56 +121,76 @@ class IndexView(web.View):
         form = self.RecordForm(await self.request.post())
         form.adapter.choices = self.adapters_choices
         form.channel.choices = self.channels_choices
-        if form.validate():
-            data = remove_special_data(form.data)
+        if form.data["submit"]:
+            if form.validate():
+                data = remove_special_data(form.data)
 
-            error = False
-            begin_date = data["begin_date"]
-            if begin_date is None:
-                immediate = True
-                begin_date = datetime.now()
-            else:
-                immediate = False
-                if begin_date <= datetime.now():
+                error = False
+                begin_date = data["begin_date"]
+                if begin_date is None:
+                    immediate = True
+                    begin_date = datetime.now()
+                else:
+                    immediate = False
+                    if begin_date <= datetime.now():
+                        error = True
+                        message = _("La date de début doit être dans le futur.")
+                end_date = data["end_date"]
+                if begin_date >= end_date:
                     error = True
-                    message = _("La date de début doit être dans le futur.")
-            end_date = data["end_date"]
-            if begin_date >= end_date:
-                error = True
-                message = _("La date de début doit être antérieure à la date de fin.")
-            duration = (end_date - begin_date).total_seconds()
-            if duration > int(self.recorder.max_duration):
-                error = True
-                message = _("La durée de l'enregistrement est trop longue.")
-            if error:
-                flash(self.request, ("danger", message))
+                    message = _("La date de début doit être antérieure à la date de fin.")
+                duration = (end_date - begin_date).total_seconds()
+                if duration > int(self.recorder.max_duration):
+                    error = True
+                    message = _("La durée de l'enregistrement est trop longue.")
+                if error:
+                    flash(self.request, ("danger", message))
+                else:
+                    adapter = data["adapter"]
+                    shutdown = data["shutdown"]
+                    channel = self.channels_choices[data["channel"]][1]
+                    program_name = data["program_name"]
+                    self.recorder.record(adapter, channel, program_name, immediate,
+                                         begin_date, end_date, duration, shutdown)
+                    message = _(
+                        "L'enregistrement de \"{}\" est programmé "
+                        "pour le {} à {} pendant {} minutes de \"{}\" "
+                        "sur l'enregistreur {}"
+                    ).format(
+                        program_name, begin_date.strftime("%d/%m/%Y"),
+                        begin_date.strftime("%H:%M"), round(duration / 60),
+                        channel, adapter
+                    )
+                    flash(self.request, ("info", message))
+                    return web.HTTPFound(self.request.app.router["index"].url_for())
             else:
-                adapter = data["adapter"]
-                shutdown = data["shutdown"]
-                channel = self.channels_choices[data["channel"]][1]
-                program_name = data["program_name"]
-                self.recorder.record(adapter, channel, program_name, immediate,
-                                     begin_date, end_date, duration, shutdown)
-                message = _(
-                    "L'enregistrement de \"{}\" est programmé "
-                    "pour le {} à {} pendant {} minutes de \"{}\" "
-                    "sur l'enregistreur {}"
-                ).format(
-                    program_name, begin_date.strftime("%d/%m/%Y"),
-                    begin_date.strftime("%H:%M"), round(duration / 60),
-                    channel, adapter
-                )
-                flash(self.request, ("info", message))
-                return web.HTTPFound(self.request.app.router["index"].url_for())
-        else:
-            flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
-        return {"form": form, "recordings": self.recorder.recordings}
+                flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
+
+        form2 = self.WakeupForm(await self.request.post())
+        if form2.data["submit2"]:
+            if form2.validate():
+                data = remove_special_data(form2.data)
+                wakeup_date = data["wakeup_date"]
+                self.wakeup.add_wakeup(wakeup_date)
+            else:
+                flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
+
+        return {
+            "form": form, "recordings": self.recorder.recordings,
+            "form2": form2, "wakeups": self.wakeup.wakeups
+        }
 
     async def get(self,):
         form = self.RecordForm()
         form.adapter.choices = self.adapters_choices
         form.channel.choices = self.channels_choices
-        return {"form": form, "recordings": self.recorder.recordings}
+
+        form2 = self.WakeupForm()
+
+        return {
+            "form": form, "recordings": self.recorder.recordings,
+            "form2": form2, "wakeups": self.wakeup.wakeups
+        }
 
 
 if __name__ == "__main__":
@@ -165,6 +205,7 @@ if __name__ == "__main__":
     app = web.Application(middlewares=[error_middleware, babel_middleware])
 
     app.recorder = Recorder(config["recorder"], path)
+    app.wakeup = Wakeup(config["wakeup"], path)
 
     session_setup(app, SimpleCookieStorage())
     app.middlewares.append(aiohttp_session_flash.middleware)
@@ -182,6 +223,8 @@ if __name__ == "__main__":
 
     app.router.add_get("/recording/cancel/{id:\d+}/", cancel_recording,
                        name="cancel_recording")
+    app.router.add_get("/wakeup/cancel/{id:\d+}/", cancel_wakeup,
+                       name="cancel_wakeup")
 
     app.router.add_routes(routes)
     static_dir = op.join(op.dirname(op.abspath(__file__)), "static")
