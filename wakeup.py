@@ -41,15 +41,16 @@ class Wakeup:
         self.setup_wakeup()
 
     def setup_wakeup(self):
+        # remove expired wakeups
+        now = datetime.now()
+        wus = dict(filter(lambda x: x[1] > now, self.wakeups.items()))
+        self.wakeups = wus
+
         if len(self.wakeups) == 0:
             logger.info(_("Annulation du réveil"))
             cancel_wakeup()
         else:
-            # remove expired wakeups
-            now = datetime.now()
-            wus = dict(filter(lambda x: x[1] > now, self.wakeups.items()))
-            self.wakeups = wus
-
+            # schedule the nearest wake up
             wu = sorted(self.wakeups.values())[0]
 
             logger.info(
