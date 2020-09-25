@@ -1,3 +1,8 @@
+Version
+=======
+
+0.6
+
 Downloads
 =========
 
@@ -31,5 +36,5 @@ Update : ::
 Note
 ====
 
-I use the github version of aiohttp-babel since I use a feature that is not
+I use the github version of aiohttp-babel because I use a feature that is not
 included in the latest release.

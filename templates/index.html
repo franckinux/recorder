@@ -195,41 +195,41 @@
 
 <script>
 $.fn.datetimepicker.Constructor.Default = $.extend({}, $.fn.datetimepicker.Constructor.Default, {
-	icons: {
-		time: "far fa-clock",
-		date: "far fa-calendar",
-		up: "fas fa-arrow-up",
-		down: "fas fa-arrow-down",
-		previous: "fas fa-chevron-left",
-		next: "fas fa-chevron-right",
-		today: "far fa-calendar-check-o",
-		clear: "far fa-trash",
-		close: "far fa-times"
-	}
+    icons: {
+        time: "far fa-clock",
+        date: "far fa-calendar",
+        up: "fas fa-arrow-up",
+        down: "fas fa-arrow-down",
+        previous: "fas fa-chevron-left",
+        next: "fas fa-chevron-right",
+        today: "far fa-calendar-check-o",
+        clear: "far fa-trash",
+        close: "far fa-times"
+    }
 });
 
 $(function() {
     $("#begin_date").datetimepicker({
         locale: "fr",
-		allowInputToggle: true,
-		minDate: moment(),
-		stepping: 5
+        allowInputToggle: true,
+        minDate: moment(),
+        stepping: 5
     });
 });
 $(function() {
     $("#end_date").datetimepicker({
         locale: "fr",
-		allowInputToggle: true,
-		minDate: moment(),
-		stepping: 5
+        allowInputToggle: true,
+        minDate: moment(),
+        stepping: 5
     });
 });
 $(function() {
     $("#wakeup_date").datetimepicker({
         locale: "fr",
-		allowInputToggle: true,
-		minDate: moment(),
-		stepping: 5
+        allowInputToggle: true,
+        minDate: moment(),
+        stepping: 5
     });
 });
 </script>
