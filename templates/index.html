@@ -3,13 +3,14 @@
 
 {% block styles %}
 {{ super() }}
-<link href="/static/gijgo/css/gijgo.min.css" rel="stylesheet" type="text/css">
+    <link type="text/css" href="/static/fontawesome-free/css/all.css" rel="stylesheet">
+    <link type="text/css" href="/static/tempusdominus-bootstrap4/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet">
+    <link type="text/css" href="/static/css/styles.css" rel="stylesheet">
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
-<script src="/static/gijgo/js/gijgo.min.js" type="text/javascript"></script>
-<script src="/static/gijgo/js/messages/messages.fr-fr.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/static/tempusdominus-bootstrap4/js/tempusdominus-bootstrap-4.min.js"></script>
 {% endblock %}
 
 {% block page_content %}
@@ -31,7 +32,7 @@
     <div id="schedule" class="tab-pane fade show active" role="tabpanel" aria-labelledby="schedule-tab">
         <h2>{{ _("Programmation d'un enregistrement") }}</h2>
         <form method="POST" action="{{ url("index") }}" role="form">
-            <div class="form-group">
+            <div class="form-group col-sm-1">
                 {{ form.adapter.label(for="adapter") }}
                 {{ form.adapter(class="form-control") }}
                 {% if form.adapter.errors %}
@@ -40,7 +41,7 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="form-group">
+            <div class="form-group col-sm-4">
                 {{ form.channel.label(for="channel") }}
                 {{ form.channel(class="form-control") }}
                 {% if form.channel.errors %}
@@ -49,7 +50,7 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="form-group{% if form.program_name.errors %} has-error{% endif %}">
+            <div class="form-group col-sm-6{% if form.program_name.errors %} has-error{% endif %}">
                 {{ form.program_name.label(for="program_name") }}
                 {{ form.program_name(class="form-control") }}
                 {% if form.program_name.errors %}
@@ -58,29 +59,47 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="form-group{% if form.begin_date.errors %} has-error{% endif %}">
+            <div class="form-group col-sm-4{% if form.begin_date.errors %} has-error{% endif %}">
                 {{ form.begin_date.label(for="begin_date") }}
-                {% if form.begin_date.data is none %}
-                <input id="begin_date" name="begin_date" width="100%" placeholder="{{ _("Entrez la date de début") }}" />
-                {% else %}
-                <input id="begin_date" name="begin_date" width="100%" value="{{ form.begin_date.data.strftime("%d-%m-%Y %H:%M") }}" />
-                {% endif %}
+                <div class="input-group date{% if form.begin_date.errors %} has-error{% endif %}" id="begin_date" data-target-input="nearest">
+                    <input type="text" id="begin_date" name="begin_date" class="form-control datetimepicker-input" data-target="#begin_date"
+                    {% if form.begin_date.data is none %}
+                    placeholder="{{ _("Entrez la date de début") }}"
+                    {% else %}
+                    value="{{ form.begin_date.data.strftime("%d/%m/%Y %H:%M") }}"
+                    {% endif %}
+                    />
+                    <div class="input-group-append" data-target="#begin_date" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="far fa-calendar"></i></div>
+                    </div>
+                </div>
+                {% if form.begin_date.errors %}
                 <div class="help-text">
                     {% for error in form.begin_date.errors %}<p>{{ error }}</p>{% endfor %}
                 </div>
-            </div>
-            <div class="form-group{% if form.end_date.errors %} has-error{% endif %}">
-                {{ form.end_date.label(for="end_date") }}
-                {% if form.end_date.data is none %}
-                <input id="end_date" name="end_date" width="100%" placeholder="{{ _("Entrez la date de fin") }}"  />
-                {% else %}
-                <input id="end_date" name="end_date" width="100%" value="{{ form.end_date.data.strftime("%d-%m-%Y %H:%M") }}" />
                 {% endif %}
+            </div>
+            <div class="form-group col-sm-4{% if form.end_date.errors %} has-error{% endif %}">
+                {{ form.end_date.label(for="end_date") }}
+                <div class="input-group date" id="end_date" data-target-input="nearest">
+                    <input type="text" id="end_date" name="end_date" class="form-control datetimepicker-input" data-target="#end_date"
+                    {% if form.end_date.data is none %}
+                    placeholder="{{ _("Entrez la date de fin") }}"
+                    {% else %}
+                    value="{{ form.end_date.data.strftime("%d/%m/%Y %H:%M") }}"
+                    {% endif %}
+                    />
+                    <div class="input-group-append" data-target="#end_date" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="far fa-calendar"></i></div>
+                    </div>
+                </div>
+                {% if form.end_date.errors %}
                 <div class="help-text">
                     {% for error in form.end_date.errors %}<p>{{ error }}</p>{% endfor %}
                 </div>
+                {% endif %}
             </div>
-            <div class="form-check">
+            <div class="form-check col-sm-2">
                 {{ form.shutdown(class="form-check-input") }}
                 {{ form.shutdown.label(for="shutdown") }}
             </div>
@@ -124,16 +143,25 @@
     <div id="wakeup" class="tab-pane fade" role="tabpanel" aria-labelledby="wakeup-tab">
         <h2>{{ _("Programmation d'un réveil") }}</h2>
         <form method="POST" action="{{ url("index") }}" role="form">
-            <div class="form-group{% if form2.wakeup_date.errors %} has-error{% endif %}">
+            <div class="form-group col-sm-4{% if form2.wakeup_date.errors %} has-error{% endif %}">
                 {{ form2.wakeup_date.label(for="wakeup_date") }}
-                {% if form2.wakeup_date.data is none %}
-                <input id="wakeup_date" name="wakeup_date" width="100%" placeholder="{{ _("Entrez la date de réveil") }}" />
-                {% else %}
-                <input id="wakeup_date" name="wakeup_date" width="100%" value="{{ form2.wakeup_date.data.strftime("%d-%m-%Y %H:%M") }}" />
-                {% endif %}
+                <div class="input-group date" id="wakeup_date" data-target-input="nearest">
+                    <input type="text" id="wakeup_date" name="wakeup_date" class="form-control datetimepicker-input" data-target="#wakeup_date"
+                    {% if form2.wakeup_date.data is none %}
+                    placeholder="{{ _("Entrez la date de réveil") }}"
+                    {% else %}
+                    value="{{ form2.wakeup_date.data.strftime("%d/%m/%Y %H:%M") }}"
+                    {% endif %}
+                    />
+                    <div class="input-group-append" data-target="#wakeup_date" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="far fa-calendar"></i></div>
+                    </div>
+                </div>
+                {% if form2.wakeup_date.errors %}
                 <div class="help-text">
                     {% for error in form2.wakeup_date.errors %}<p>{{ error }}</p>{% endfor %}
                 </div>
+                {% endif %}
             </div>
             <div>
                 {{ form2.submit2(class="btn btn-primary") }}
@@ -166,32 +194,43 @@
 </div>
 
 <script>
-    $('#begin_date').datetimepicker({
-        format: "dd-mm-yyyy HH:MM",
-        modal: true,
-        footer: true,
-        uiLibrary: "bootstrap4",
-        locale: "fr-fr",
-        minDate: Date.now(),
-        weekStartDay: 1
+$.fn.datetimepicker.Constructor.Default = $.extend({}, $.fn.datetimepicker.Constructor.Default, {
+	icons: {
+		time: "far fa-clock",
+		date: "far fa-calendar",
+		up: "fas fa-arrow-up",
+		down: "fas fa-arrow-down",
+		previous: "fas fa-chevron-left",
+		next: "fas fa-chevron-right",
+		today: "far fa-calendar-check-o",
+		clear: "far fa-trash",
+		close: "far fa-times"
+	}
+});
+
+$(function() {
+    $("#begin_date").datetimepicker({
+        locale: "fr",
+		allowInputToggle: true,
+		minDate: moment(),
+		stepping: 5
     });
-    $('#end_date').datetimepicker({
-        format: "dd-mm-yyyy HH:MM",
-        modal: true,
-        footer: true,
-        uiLibrary: "bootstrap4",
-        locale: "fr-fr",
-        minDate: Date.now(),
-        weekStartDay: 1
+});
+$(function() {
+    $("#end_date").datetimepicker({
+        locale: "fr",
+		allowInputToggle: true,
+		minDate: moment(),
+		stepping: 5
     });
-    $('#wakeup_date').datetimepicker({
-        format: "dd-mm-yyyy HH:MM",
-        modal: true,
-        footer: true,
-        uiLibrary: "bootstrap4",
-        locale: "fr-fr",
-        minDate: Date.now(),
-        weekStartDay: 1
+});
+$(function() {
+    $("#wakeup_date").datetimepicker({
+        locale: "fr",
+		allowInputToggle: true,
+		minDate: moment(),
+		stepping: 5
     });
+});
 </script>
 {% endblock %}

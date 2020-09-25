@@ -68,7 +68,7 @@ msgstr "Recording is too long."
 
 #: main.py:155
 msgid "L'enregistrement de \"{}\" est programmé pour le {} à {} pendant {} minutes de \"{}\" sur l'enregistreur {}"
-msgstr "Recording of \"{}\" is scheduled from {} to {} during {} minutes on \"{}\" on recorder {}"
+msgstr "Recording of \"{}\" is scheduled from {} at {} during {} minutes on \"{}\" on recorder {}"
 
 #: main.py:167 main.py:176
 msgid "Le formulaire contient des erreurs."
@@ -96,7 +96,7 @@ msgstr "Recording {} (id={})"
 
 #: recorder.py:82
 msgid "Programmation de l'enregistrement de \"{}\" pendant {} minutes de \"{}\" sur l'enregistreur {} (id={})"
-msgstr "Scheduling of recording of \"{}\" during {} minutes on \"{}\" from recorder {} (id={})"
+msgstr "Scheduling recording of \"{}\" during {} minutes on \"{}\" from recorder {} (id={})"
 
 #: recorder.py:126
 msgid "Annulation de {} (id={})"

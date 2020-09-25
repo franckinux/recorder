@@ -89,13 +89,13 @@ class IndexView(web.View):
         begin_date = DateTimeField(
             _l("Date de début"),
             id="begin_date",
-            format="%d-%m-%Y %H:%M",
+            format="%d/%m/%Y %H:%M",
             validators=[Optional()]
         )
         end_date = DateTimeField(
             _l("Date de fin"),
             id="end_date",
-            format="%d-%m-%Y %H:%M",
+            format="%d/%m/%Y %H:%M",
             validators=[DataRequired()]
         )
         shutdown = BooleanField(_l("Extinction"))
@@ -105,7 +105,7 @@ class IndexView(web.View):
         wakeup_date = DateTimeField(
             _l("Date de réveil"),
             id="wakeup_date",
-            format="%d-%m-%Y %H:%M",
+            format="%d/%m/%Y %H:%M",
             validators=[DataRequired()]
         )
         submit2 = SubmitField(_l("Valider"))
