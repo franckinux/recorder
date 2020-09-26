@@ -177,6 +177,7 @@ class IndexView(web.View):
                 data = remove_special_data(form2.data)
                 wakeup_date = data["wakeup_date"]
                 self.wakeup.add_wakeup(wakeup_date)
+                return web.HTTPFound(self.request.app.router["index"].url_for())
             else:
                 flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
 
