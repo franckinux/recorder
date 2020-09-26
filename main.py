@@ -30,6 +30,7 @@ from utils import _l
 from utils import read_configuration_file
 from utils import remove_special_data
 from utils import set_language
+from utils import halt
 from wakeup import Wakeup
 
 routes = web.RouteTableDef()
@@ -110,6 +111,10 @@ class IndexView(web.View):
         )
         submit2 = SubmitField(_l("Valider"))
 
+    class ToolsForm(Form):
+        shutdown = BooleanField(_l("Extinction"))
+        submit3 = SubmitField(_l("Valider"))
+
     def __init__(self, request):
         super().__init__(request)
         self.recorder = request.app.recorder
@@ -175,9 +180,19 @@ class IndexView(web.View):
             else:
                 flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
 
+        form3 = self.ToolsForm(await self.request.post())
+        if form3.data["submit3"]:
+            if form3.validate():
+                data = remove_special_data(form3.data)
+                if data["shutdown"]:
+                    halt()
+            else:
+                flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
+
         return {
             "form": form, "recordings": self.recorder.recordings,
-            "form2": form2, "wakeups": self.wakeup.wakeups
+            "form2": form2, "wakeups": self.wakeup.wakeups,
+            "form3": form3
         }
 
     async def get(self,):
@@ -186,10 +201,12 @@ class IndexView(web.View):
         form.channel.choices = self.channels_choices
 
         form2 = self.WakeupForm()
+        form3 = self.ToolsForm()
 
         return {
             "form": form, "recordings": self.recorder.recordings,
-            "form2": form2, "wakeups": self.wakeup.wakeups
+            "form2": form2, "wakeups": self.wakeup.wakeups,
+            "form3": form3
         }
 
 

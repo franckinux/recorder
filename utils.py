@@ -66,6 +66,10 @@ def write_configuration_file(path, config):
         config.write(f)
 
 
+def halt():
+    os.system("sudo shutdown -h now")
+
+
 def wakeup(date):
     os.system(f"sudo rtcwake -m no -u -t {date.strftime('%s')}")
 

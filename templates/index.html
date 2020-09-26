@@ -26,6 +26,9 @@
     <li class="nav-item">
       <a class="nav-link" data-toggle="tab" href="#wakeup" role="tab" aria-controls="wakeup" aria-selected="false">{{ _("Réveils") }} </a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#tools" role="tab" aria-controls="tools" aria-selected="false">{{ _("Outils") }} </a>
+    </li>
   </ul>
 
   <div class="tab-content">
@@ -188,6 +191,20 @@
         </tbody>
         </table>
         {% endif %}
+    </div>
+
+    <div id="tools" class="tab-pane fade" role="tabpanel" aria-labelledby="tools-tab">
+        <h2>{{ _("Extinction") }}</h2>
+        <form method="POST" action="{{ url("index") }}" role="form">
+            <div class="form-check col-sm-2">
+                {{ form3.shutdown(class="form-check-input") }}
+                {{ form3.shutdown.label(for="shutdown") }}
+            </div>
+            <div>
+                {{ form3.submit3(class="btn btn-primary") }}
+                <a href="{{ url("index") }}" class="btn btn-light">{{ _("Annuler") }}</a>
+            </div>
+        </form>
     </div>
 
   </div>
