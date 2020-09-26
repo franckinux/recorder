@@ -3,6 +3,37 @@ Version
 
 0.6.1
 
+Presentation
+============
+
+This application is a video recorder for a media server fitted with DVB video
+adapters. It works as a web server, so you have to use a web browser to schelule
+your recording sessions.
+
+Yon can paralellize the recordings using multiple adapters. The PC can be shut
+down at the end of any recording. Furthermore, the PC can be started any number
+of times.
+
+For example in the following screenshots, there is 3 recording sequences. In the
+first one, you have the following envents :
+
+- the PC is started at sept 29, 2020 at 10:40 pm ;
+- the recording of "Monsieur Batignole" starts at 10:45 pm till Sept 30,
+  0:40 am on adapter 0 ;
+- the recording of "Banzaï" starts at 11:00 pm till Sept 30,
+  1:15 am on adapter 1 ;
+- the PC is shut down at the end of the last recording.
+
+
+Screenshots
+===========
+
+.. image:: images/schedule.png
+.. image:: images/list.png
+.. image:: images/awakenings.png
+.. image:: images/tools.png
+
+
 Downloads
 =========
 
