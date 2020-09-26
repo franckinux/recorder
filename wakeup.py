@@ -31,7 +31,11 @@ class Wakeup:
         self.id = 1
 
     def add_wakeup(self, date):
-        logger.info(_("Ajout du réveil (id={})").format(self.id))
+        logger.info(
+            _("Ajout du réveil le {} à {} (id={})").format(
+                date.strftime("%d/%m/%Y"), date.strftime("%H:%M"), self.id
+            )
+        )
         self.wakeups[self.id] = date
         self.id += 1
         self.setup_wakeup()
