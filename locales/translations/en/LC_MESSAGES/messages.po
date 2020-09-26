@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-09-24 16:13+0200\n"
+"POT-Creation-Date: 2020-09-26 11:27+0200\n"
 "PO-Revision-Date: 2020-09-09 22:13+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,59 +18,59 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: main.py:82 templates/index.html:103
+#: main.py:83 templates/index.html:125
 msgid "Enregistreur"
 msgstr "Recorder"
 
-#: main.py:83 templates/index.html:100
+#: main.py:84 templates/index.html:122
 msgid "Chaîne"
 msgstr "Channel"
 
-#: main.py:85 templates/index.html:99
+#: main.py:86 templates/index.html:121
 msgid "Nom du programme"
 msgstr "Program name"
 
-#: main.py:87
+#: main.py:88
 msgid "Entrez le nom du programme"
 msgstr "Enter program name"
 
-#: main.py:90 templates/index.html:101
+#: main.py:91 templates/index.html:123
 msgid "Date de début"
 msgstr "Begin date"
 
-#: main.py:96 templates/index.html:102
+#: main.py:97 templates/index.html:124
 msgid "Date de fin"
 msgstr "End date"
 
-#: main.py:101 templates/index.html:104
+#: main.py:102 main.py:115 templates/index.html:126 templates/index.html:197
 msgid "Extinction"
 msgstr "Shutdown"
 
-#: main.py:102 main.py:111
+#: main.py:103 main.py:112 main.py:116
 msgid "Valider"
 msgstr "Validate"
 
-#: main.py:106
+#: main.py:107
 msgid "Date de réveil"
-msgstr "Wake up time"
+msgstr "Waking time"
 
-#: main.py:137
+#: main.py:142
 msgid "La date de début doit être dans le futur."
 msgstr "Begin date must be in the future."
 
-#: main.py:141
+#: main.py:146
 msgid "La date de début doit être antérieure à la date de fin."
 msgstr "Begin date must be anterior to end date."
 
-#: main.py:145
+#: main.py:150
 msgid "La durée de l'enregistrement est trop longue."
 msgstr "Recording is too long."
 
-#: main.py:155
+#: main.py:160
 msgid "L'enregistrement de \"{}\" est programmé pour le {} à {} pendant {} minutes de \"{}\" sur l'enregistreur {}"
 msgstr "Recording of \"{}\" is scheduled from {} at {} during {} minutes on \"{}\" on recorder {}"
 
-#: main.py:167 main.py:176
+#: main.py:172 main.py:181 main.py:190
 msgid "Le formulaire contient des erreurs."
 msgstr "The form contains some errors."
 
@@ -102,60 +102,72 @@ msgstr "Scheduling recording of \"{}\" during {} minutes on \"{}\" from recorder
 msgid "Annulation de {} (id={})"
 msgstr "Cancel {} (id={})"
 
-#: wakeup.py:45
+#: wakeup.py:34
+msgid "Ajout du réveil (id={})"
+msgstr "Add awakening (id={})"
+
+#: wakeup.py:41
+msgid "Suppression du réveil (id={})"
+msgstr "Remove awakening (id={})"
+
+#: wakeup.py:53
 msgid "Annulation du réveil"
-msgstr "Cancel wake up"
+msgstr "Cancel awakening"
 
-#: wakeup.py:56
+#: wakeup.py:60
 msgid "Programmation du réveil le {} à {} (id={})"
-msgstr "Schedule a wake up on {} at {} (id={})"
+msgstr "Schedule an awakening on {} at {} (id={})"
 
-#: templates/index.html:2 templates/index.html:32
+#: templates/index.html:2 templates/index.html:36
 msgid "Programmation d'un enregistrement"
 msgstr "Schedule a recording"
 
-#: templates/index.html:20
+#: templates/index.html:21
 msgid "Programmation"
 msgstr "Schedule"
 
-#: templates/index.html:23
+#: templates/index.html:24
 msgid "Liste"
 msgstr "List"
 
-#: templates/index.html:26
+#: templates/index.html:27
 msgid "Réveils"
-msgstr "Wake up"
+msgstr "Awakenings"
 
-#: templates/index.html:64
+#: templates/index.html:30
+msgid "Outils"
+msgstr "Tools"
+
+#: templates/index.html:70
 msgid "Entrez la date de début"
 msgstr "Enter begin date"
 
-#: templates/index.html:75
+#: templates/index.html:90
 msgid "Entrez la date de fin"
 msgstr "Enter end date"
 
-#: templates/index.html:89 templates/index.html:117 templates/index.html:140
-#: templates/index.html:157
+#: templates/index.html:111 templates/index.html:139 templates/index.html:171
+#: templates/index.html:188 templates/index.html:205
 msgid "Annuler"
 msgstr "Cancel"
 
-#: templates/index.html:95
+#: templates/index.html:117
 msgid "Liste des enregistrements"
 msgstr "Recording list"
 
-#: templates/index.html:125
+#: templates/index.html:147
 msgid "Programmation d'un réveil"
-msgstr "Schedule a wake up"
+msgstr "Schedule an awakening"
 
-#: templates/index.html:130
+#: templates/index.html:154
 msgid "Entrez la date de réveil"
-msgstr "Enter wake up date"
+msgstr "Enter waking date"
 
-#: templates/index.html:145
+#: templates/index.html:176
 msgid "Liste des réveils"
-msgstr "Wake up list"
+msgstr "Awakenings list"
 
-#: templates/index.html:149
+#: templates/index.html:180
 msgid "Date"
 msgstr "Date"
 

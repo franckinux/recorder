@@ -1,11 +1,15 @@
 [Unit]
 Description=Dvb recorder
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 WorkingDirectory=/home/franck/Documents/projets/python/recorder
 ExecStart=/home/franck/Documents/projets/python/recorder/start.sh
 User=franck
 Group=franck
+Restart=on-failure
+RestartSec=10s
 
 [Install]
 WantedBy=multi-user.target

@@ -11,8 +11,8 @@ from utils import wakeup
 
 logger = logging.getLogger(__name__)
 
-WAKEUPS_BIN_FILENAME = "wakeups.bin"
-WAKEUPS_LOG_FILENAME = "wakeups.log"
+WAKEUPS_BIN_FILENAME = "awakenings.bin"
+WAKEUPS_LOG_FILENAME = "awakenings.log"
 
 
 class Wakeup:
@@ -31,14 +31,16 @@ class Wakeup:
         self.id = 1
 
     def add_wakeup(self, date):
+        logger.info(_("Ajout du réveil (id={})").format(self.id))
         self.wakeups[self.id] = date
         self.id += 1
         self.setup_wakeup()
 
     def cancel_wakeup(self, id_):
         if id_ in self.wakeups:
+            logger.info(_("Suppression du réveil (id={})").format(id_))
             del(self.wakeups[id_])
-        self.setup_wakeup()
+            self.setup_wakeup()
 
     def setup_wakeup(self):
         # remove expired wakeups
@@ -47,18 +49,20 @@ class Wakeup:
         self.wakeups = wus
 
         if len(self.wakeups) == 0:
+            # utils function, not the method of this class !
             logger.info(_("Annulation du réveil"))
             cancel_wakeup()
         else:
-            # schedule the nearest wake up
-            wu = sorted(self.wakeups.values())[0]
+            # select the nearest wake up...
+            wui, wut = sorted(self.wakeups.items(), key=lambda w: w[1])[0]
 
             logger.info(
                 _("Programmation du réveil le {} à {} (id={})").format(
-                    wu.strftime("%d/%m/%Y"), wu.strftime("%H:%M"), self.id
+                    wut.strftime("%d/%m/%Y"), wut.strftime("%H:%M"), wui
                 )
             )
-            wakeup(wu)
+            # ...and schedule it
+            wakeup(wut)
 
     @set_locale
     def save(self):
