@@ -44,7 +44,7 @@ where they have been taken and what are the versions used here :
 - `Bootstrap 4 <http://getbootstrap.com/>`_ - Version 4.5.2 ;
 - `Popper <https://popper.js.org/>`_- Version 2.5.1 ;
 - `Moment <https://momentjs.com/>`_- Version 2.29.0 ;
-- `Tempus Dominus - Bootstrap 4 <htpp://>`_ - Version 5.1.2 ;
+- `Tempus Dominus - Bootstrap 4 <https://github.com/tempusdominus/bootstrap-4>`_ - Version 5.1.2 ;
 - `Font Awesome <https://fontawesome.com/>`_- Version 5.14.0 ;
 
 Internationalization
