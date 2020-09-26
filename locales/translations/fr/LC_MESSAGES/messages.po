@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-09-26 11:27+0200\n"
+"POT-Creation-Date: 2020-09-26 12:16+0200\n"
 "PO-Revision-Date: 2020-09-09 22:13+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -102,19 +102,19 @@ msgstr ""
 msgid "Annulation de {} (id={})"
 msgstr ""
 
-#: wakeup.py:34
-msgid "Ajout du réveil (id={})"
+#: wakeup.py:35
+msgid "Ajout du réveil le {} à {} (id={})"
 msgstr ""
 
-#: wakeup.py:41
+#: wakeup.py:45
 msgid "Suppression du réveil (id={})"
 msgstr ""
 
-#: wakeup.py:53
+#: wakeup.py:57
 msgid "Annulation du réveil"
 msgstr ""
 
-#: wakeup.py:60
+#: wakeup.py:64
 msgid "Programmation du réveil le {} à {} (id={})"
 msgstr ""
 
