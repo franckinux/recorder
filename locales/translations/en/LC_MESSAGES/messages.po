@@ -52,7 +52,7 @@ msgstr "Validate"
 
 #: main.py:107
 msgid "Date de réveil"
-msgstr "Waking time"
+msgstr "Awakening time"
 
 #: main.py:142
 msgid "La date de début doit être dans le futur."
@@ -161,7 +161,7 @@ msgstr "Schedule an awakening"
 
 #: templates/index.html:154
 msgid "Entrez la date de réveil"
-msgstr "Enter waking date"
+msgstr "Enter awakening date"
 
 #: templates/index.html:176
 msgid "Liste des réveils"

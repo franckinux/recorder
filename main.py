@@ -25,13 +25,13 @@ from wtforms.validators import DataRequired
 from wtforms.validators import Optional
 
 from error import error_middleware
-from recorder import Recorder
+from recorder import Recordings
 from utils import _l
 from utils import read_configuration_file
 from utils import remove_special_data
 from utils import set_language
 from utils import halt
-from wakeup import Wakeup
+from wakeup import Awakenings
 
 routes = web.RouteTableDef()
 
@@ -69,9 +69,9 @@ async def cancel_recording(request):
 
 
 @aiohttp_jinja2.template("index.html")
-async def cancel_wakeup(request):
+async def cancel_awakening(request):
     id_ = int(request.match_info["id"])
-    request.app.wakeup.cancel_wakeup(id_)
+    request.app.wakeup.cancel_awakening(id_)
     return web.HTTPFound(request.app.router["index"].url_for())
 
 
@@ -79,7 +79,7 @@ async def cancel_wakeup(request):
 @aiohttp_jinja2.template("index.html")
 class IndexView(web.View):
 
-    class RecordForm(Form):
+    class RecordingForm(Form):
         adapter = SelectField(_l("Enregistreur"), coerce=int)
         channel = SelectField(_l("Chaîne"), coerce=int)
         program_name = StringField(
@@ -102,10 +102,10 @@ class IndexView(web.View):
         shutdown = BooleanField(_l("Extinction"))
         submit = SubmitField(_l("Valider"))
 
-    class WakeupForm(Form):
-        wakeup_date = DateTimeField(
+    class AwakeningForm(Form):
+        awakening_date = DateTimeField(
             _l("Date de réveil"),
-            id="wakeup_date",
+            id="awakening_date",
             format="%d/%m/%Y %H:%M",
             validators=[DataRequired()]
         )
@@ -123,7 +123,7 @@ class IndexView(web.View):
         self.channels_choices = list(enumerate(self.recorder.get_channels()))
 
     async def post(self):
-        form = self.RecordForm(await self.request.post())
+        form = self.RecordingForm(await self.request.post())
         form.adapter.choices = self.adapters_choices
         form.channel.choices = self.channels_choices
         if form.data["submit"]:
@@ -171,12 +171,12 @@ class IndexView(web.View):
             else:
                 flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
 
-        form2 = self.WakeupForm(await self.request.post())
+        form2 = self.AwakeningForm(await self.request.post())
         if form2.data["submit2"]:
             if form2.validate():
                 data = remove_special_data(form2.data)
-                wakeup_date = data["wakeup_date"]
-                self.wakeup.add_wakeup(wakeup_date)
+                awakening_date = data["awakening_date"]
+                self.wakeup.add_awakening(awakening_date)
                 return web.HTTPFound(self.request.app.router["index"].url_for())
             else:
                 flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
@@ -191,22 +191,22 @@ class IndexView(web.View):
                 flash(self.request, ("danger", _("Le formulaire contient des erreurs.")))
 
         return {
-            "form": form, "recordings": self.recorder.recordings,
-            "form2": form2, "wakeups": self.wakeup.wakeups,
+            "form": form, "recordings": self.recorder.get_recordings(),
+            "form2": form2, "awakenings": self.wakeup.get_awakenings(),
             "form3": form3
         }
 
     async def get(self,):
-        form = self.RecordForm()
+        form = self.RecordingForm()
         form.adapter.choices = self.adapters_choices
         form.channel.choices = self.channels_choices
 
-        form2 = self.WakeupForm()
+        form2 = self.AwakeningForm()
         form3 = self.ToolsForm()
 
         return {
-            "form": form, "recordings": self.recorder.recordings,
-            "form2": form2, "wakeups": self.wakeup.wakeups,
+            "form": form, "recordings": self.recorder.get_recordings(),
+            "form2": form2, "awakenings": self.wakeup.get_awakenings(),
             "form3": form3
         }
 
@@ -222,8 +222,8 @@ if __name__ == "__main__":
 
     app = web.Application(middlewares=[error_middleware, babel_middleware])
 
-    app.recorder = Recorder(config["recorder"], path)
-    app.wakeup = Wakeup(config["wakeup"], path)
+    app.recorder = Recordings(config["recorder"], path)
+    app.wakeup = Awakenings(config["wakeup"], path)
 
     session_setup(app, SimpleCookieStorage())
     app.middlewares.append(aiohttp_session_flash.middleware)
@@ -241,8 +241,8 @@ if __name__ == "__main__":
 
     app.router.add_get("/recording/cancel/{id:\d+}/", cancel_recording,
                        name="cancel_recording")
-    app.router.add_get("/wakeup/cancel/{id:\d+}/", cancel_wakeup,
-                       name="cancel_wakeup")
+    app.router.add_get("/wakeup/cancel/{id:\d+}/", cancel_awakening,
+                       name="cancel_awakening")
 
     app.router.add_routes(routes)
     static_dir = op.join(op.dirname(op.abspath(__file__)), "static")

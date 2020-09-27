@@ -14,7 +14,7 @@ RECORDINGS_BIN_FILENAME = "recordings.bin"
 RECORDINGS_LOG_FILENAME = "recordings.log"
 
 
-class Recorder:
+class Recordings:
     def __init__(self, config, path):
         self.max_duration = int(config.get("max_duration", "18000"))
         self.dvb_adapter_number = int(config.get("dvb_adapter_number", "1"))
@@ -33,6 +33,10 @@ class Recorder:
         logger.addHandler(file_handler)
 
         self.id = 1
+
+    def get_recordings(self):
+        """Returns recordings sorted by begin date"""
+        return sorted(self.recordings.items(), key=lambda r: r[1]["begin_date"])
 
     def get_channels(self):
         with open(self.channels_conf) as fichier:
@@ -138,6 +142,7 @@ class Recorder:
 
     @set_locale
     def save(self):
+        """Saves the recordings from a file"""
         # only recordings not started
         recordings = dict(
             filter(lambda e: e[1]["process"] is None, self.recordings.items())
@@ -150,8 +155,7 @@ class Recorder:
 
     @set_locale
     def load(self):
-        """This function is executed outsite of a server request
-        so we must simulate what does the babel middleware"""
+        """Loads the recordings from a file"""
 
         try:
             with open(self.recordings_filename, "rb") as f:

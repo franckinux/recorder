@@ -6,8 +6,8 @@ import pickle
 from aiohttp_babel.middlewares import _
 
 from utils import set_locale
-from utils import cancel_wakeup
-from utils import wakeup
+from utils import cancel_awakening
+from utils import schedule_awakening
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +15,11 @@ WAKEUPS_BIN_FILENAME = "awakenings.bin"
 WAKEUPS_LOG_FILENAME = "awakenings.log"
 
 
-class Wakeup:
+class Awakenings:
 
     def __init__(self, config, path):
-        self.wakeups = {}
-        self.wakeups_filename = op.join(path, WAKEUPS_BIN_FILENAME)
+        self.awakenings = {}
+        self.awakenings_filename = op.join(path, WAKEUPS_BIN_FILENAME)
 
         log_filename = op.join(path, WAKEUPS_LOG_FILENAME)
         logger.setLevel(logging.DEBUG)
@@ -30,35 +30,39 @@ class Wakeup:
 
         self.id = 1
 
-    def add_wakeup(self, date):
+    def get_awakenings(self):
+        """Returns awakenings sorted by date"""
+        return sorted(self.awakenings.items(), key=lambda w: w[1])
+
+    def add_awakening(self, date):
         logger.info(
             _("Ajout du réveil le {} à {} (id={})").format(
                 date.strftime("%d/%m/%Y"), date.strftime("%H:%M"), self.id
             )
         )
-        self.wakeups[self.id] = date
+        self.awakenings[self.id] = date
         self.id += 1
-        self.setup_wakeup()
+        self.setup_awakening()
 
-    def cancel_wakeup(self, id_):
-        if id_ in self.wakeups:
+    def cancel_awakening(self, id_):
+        if id_ in self.awakenings:
             logger.info(_("Suppression du réveil (id={})").format(id_))
-            del(self.wakeups[id_])
-            self.setup_wakeup()
+            del(self.awakenings[id_])
+            self.setup_awakening()
 
-    def setup_wakeup(self):
-        # remove expired wakeups
+    def setup_awakening(self):
+        # remove expired awakenings
         now = datetime.now()
-        wus = dict(filter(lambda x: x[1] > now, self.wakeups.items()))
-        self.wakeups = wus
+        wus = dict(filter(lambda x: x[1] > now, self.awakenings.items()))
+        self.awakenings = wus
 
-        if len(self.wakeups) == 0:
+        if len(self.awakenings) == 0:
             # utils function, not the method of this class !
             logger.info(_("Annulation du réveil"))
-            cancel_wakeup()
+            cancel_awakening()
         else:
             # select the nearest wake up...
-            wui, wut = sorted(self.wakeups.items(), key=lambda w: w[1])[0]
+            wui, wut = sorted(self.awakenings.items(), key=lambda w: w[1])[0]
 
             logger.info(
                 _("Programmation du réveil le {} à {} (id={})").format(
@@ -66,24 +70,24 @@ class Wakeup:
                 )
             )
             # ...and schedule it
-            wakeup(wut)
+            schedule_awakening(wut)
 
     @set_locale
     def save(self):
-        with open(self.wakeups_filename, "wb") as f:
-            pickle.dump(self.wakeups, f)
+        """Saves the awakenings from a file"""
+        with open(self.awakenings_filename, "wb") as f:
+            pickle.dump(self.awakenings, f)
 
     @set_locale
     def load(self):
-        """This function is executed outsite of a server request
-        so we must simulate what does the babel middleware"""
+        """Loads the awakenings from a file"""
 
-        # wakeups
+        # awakenings
         try:
-            with open(self.wakeups_filename, "rb") as f:
+            with open(self.awakenings_filename, "rb") as f:
                 wus = pickle.load(f)
         except FileNotFoundError:
             wus = {}
 
         for w in wus.values():
-            self.add_wakeup(w)
+            self.add_awakening(w)

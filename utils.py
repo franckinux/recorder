@@ -70,9 +70,9 @@ def halt():
     os.system("sudo shutdown -h now")
 
 
-def wakeup(date):
+def schedule_awakening(date):
     os.system(f"sudo rtcwake -m no -u -t {date.strftime('%s')}")
 
 
-def cancel_wakeup():
+def cancel_awakening():
     os.system("sudo rtcwake -m disable")

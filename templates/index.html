@@ -128,15 +128,15 @@
             </tr>
         </thead>
         <tbody>
-            {% for id, rec in recordings.items() %}
+            {% for rec in recordings %}
             <tr>
-                <td>{{ rec.program_name }}</td>
-                <td>{{ rec.channel }}</td>
-                <td>{{ rec.begin_date.strftime("%d/%m/%Y %H:%M") }}</td>
-                <td>{{ rec.end_date.strftime("%d/%m/%Y %H:%M") }}</td>
-                <td>{{ rec.adapter }}</td>
-                <td>{{ rec.shutdown }}</td>
-                <td><a href="{{ url("cancel_recording", id=id) }}">{{ _("Annuler") }}</a></td>
+                <td>{{ rec[1].program_name }}</td>
+                <td>{{ rec[1].channel }}</td>
+                <td>{{ rec[1].begin_date.strftime("%d/%m/%Y %H:%M") }}</td>
+                <td>{{ rec[1].end_date.strftime("%d/%m/%Y %H:%M") }}</td>
+                <td>{{ rec[1].adapter }}</td>
+                <td>{{ rec[1].shutdown }}</td>
+                <td><a href="{{ url("cancel_recording", id=rec[0]) }}">{{ _("Annuler") }}</a></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -146,23 +146,23 @@
     <div id="wakeup" class="tab-pane fade" role="tabpanel" aria-labelledby="wakeup-tab">
         <h2>{{ _("Programmation d'un réveil") }}</h2>
         <form method="POST" action="{{ url("index") }}" role="form">
-            <div class="form-group col-sm-4{% if form2.wakeup_date.errors %} has-error{% endif %}">
-                {{ form2.wakeup_date.label(for="wakeup_date") }}
-                <div class="input-group date" id="wakeup_date" data-target-input="nearest">
-                    <input type="text" id="wakeup_date" name="wakeup_date" class="form-control datetimepicker-input" data-target="#wakeup_date"
-                    {% if form2.wakeup_date.data is none %}
+            <div class="form-group col-sm-4{% if form2.awakening_date.errors %} has-error{% endif %}">
+                {{ form2.awakening_date.label(for="awakening_date") }}
+                <div class="input-group date" id="awakening_date" data-target-input="nearest">
+                    <input type="text" id="awakening_date" name="awakening_date" class="form-control datetimepicker-input" data-target="#awakening_date"
+                    {% if form2.awakening_date.data is none %}
                     placeholder="{{ _("Entrez la date de réveil") }}"
                     {% else %}
-                    value="{{ form2.wakeup_date.data.strftime("%d/%m/%Y %H:%M") }}"
+                    value="{{ form2.awakening_date.data.strftime("%d/%m/%Y %H:%M") }}"
                     {% endif %}
                     />
-                    <div class="input-group-append" data-target="#wakeup_date" data-toggle="datetimepicker">
+                    <div class="input-group-append" data-target="#awakening_date" data-toggle="datetimepicker">
                         <div class="input-group-text"><i class="far fa-calendar"></i></div>
                     </div>
                 </div>
-                {% if form2.wakeup_date.errors %}
+                {% if form2.awakening_date.errors %}
                 <div class="help-text">
-                    {% for error in form2.wakeup_date.errors %}<p>{{ error }}</p>{% endfor %}
+                    {% for error in form2.awakening_date.errors %}<p>{{ error }}</p>{% endfor %}
                 </div>
                 {% endif %}
             </div>
@@ -172,7 +172,7 @@
             </div>
         </form>
 
-        {% if wakeups %}
+        {% if awakenings %}
         <h2>{{ _("Liste des réveils") }}</h2>
         <table class="table">
         <thead>
@@ -182,10 +182,10 @@
             </tr>
         </thead>
         <tbody>
-            {% for id, wak in wakeups.items() %}
+            {% for wak in awakenings %}
             <tr>
-                <td>{{ wak.strftime("%d/%m/%Y %H:%M") }}</td>
-                <td><a href="{{ url("cancel_wakeup", id=id) }}">{{ _("Annuler") }}</a></td>
+                <td>{{ wak[1].strftime("%d/%m/%Y %H:%M") }}</td>
+                <td><a href="{{ url("cancel_awakening", id=wak[0]) }}">{{ _("Annuler") }}</a></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -242,7 +242,7 @@ $(function() {
     });
 });
 $(function() {
-    $("#wakeup_date").datetimepicker({
+    $("#awakening_date").datetimepicker({
         locale: "fr",
         allowInputToggle: true,
         minDate: moment(),
