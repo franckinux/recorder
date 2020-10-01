@@ -60,11 +60,11 @@ class Awakenings:
         self.awakenings = wus
 
         if len(self.awakenings) == 0:
-            # utils function, not the method of this class !
             logger.info(_("Annulation du réveil"))
+            # utils function, not the method of this class !
             cancel_awakening()
         else:
-            # select the nearest wake up...
+            # select the nearest awakening...
             wui, wut = sorted(self.awakenings.items(), key=lambda w: w[1])[0]
 
             logger.info(
@@ -92,5 +92,8 @@ class Awakenings:
         except FileNotFoundError:
             wus = {}
 
-        for w in wus.values():
-            self.add_awakening(w)
+        if len(wus) == 0:
+            self.setup_awakening()
+        else:
+            for w in wus.values():
+                self.add_awakening(w)
