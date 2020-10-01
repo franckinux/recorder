@@ -25,8 +25,11 @@ class Recordings:
         self.simulate = eval(config.get("simulate", "False"))
         self.recordings_filename = op.join(path, RECORDINGS_BIN_FILENAME)
 
+        log_level = config.get("log_level", "INFO")
+        log_level = getattr(logging, log_level)
+
         log_filename = op.join(path, RECORDINGS_LOG_FILENAME)
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(log_level)
         file_handler = logging.FileHandler(log_filename)
         formatter = logging.Formatter("%(asctime)s - %(message)s")
         file_handler.setFormatter(formatter)

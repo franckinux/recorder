@@ -11,18 +11,21 @@ from utils import schedule_awakening
 
 logger = logging.getLogger(__name__)
 
-WAKEUPS_BIN_FILENAME = "awakenings.bin"
-WAKEUPS_LOG_FILENAME = "awakenings.log"
+AWAKENINGS_BIN_FILENAME = "awakenings.bin"
+AWAKENINGS_LOG_FILENAME = "awakenings.log"
 
 
 class Awakenings:
 
     def __init__(self, config, path):
         self.awakenings = {}
-        self.awakenings_filename = op.join(path, WAKEUPS_BIN_FILENAME)
+        self.awakenings_filename = op.join(path, AWAKENINGS_BIN_FILENAME)
 
-        log_filename = op.join(path, WAKEUPS_LOG_FILENAME)
-        logger.setLevel(logging.DEBUG)
+        log_level = config.get("log_level", "INFO")
+        log_level = getattr(logging, log_level)
+
+        log_filename = op.join(path, AWAKENINGS_LOG_FILENAME)
+        logger.setLevel(log_level)
         file_handler = logging.FileHandler(log_filename)
         formatter = logging.Formatter("%(asctime)s - %(message)s")
         file_handler.setFormatter(formatter)
