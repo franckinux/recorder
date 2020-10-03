@@ -232,22 +232,27 @@ $(function() {
         minDate: moment(),
         stepping: 5
     });
-});
-$(function() {
+
     $("#end_date").datetimepicker({
         locale: "fr",
         allowInputToggle: true,
         minDate: moment(),
         stepping: 5
     });
-});
-$(function() {
+
     $("#awakening_date").datetimepicker({
         locale: "fr",
         allowInputToggle: true,
         minDate: moment(),
         stepping: 5
     });
+
+    $("#begin_date").on(
+        "hide.datetimepicker",
+        function (e) {
+            $("#end_date").datetimepicker("minDate", e.date);
+        }
+    );
 });
 </script>
 {% endblock %}
