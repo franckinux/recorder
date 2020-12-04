@@ -13,6 +13,7 @@ aiohttp-session-flash = "*"
 aiohttp-session = "*"
 cryptography = "*"
 aiohttp-babel = "*"
+jedi = "*"
 
 [requires]
 python_version = "3.8"
