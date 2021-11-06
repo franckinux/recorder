@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ _("Programmation d'un enregistrement") }}{% endblock %}
 
+{% block metas %}
+{{ super() }}
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Expires" content="0" />
+{% endblock %}
+
 {% block styles %}
 {{ super() }}
     <link type="text/css" href="/static/fontawesome-free/css/all.css" rel="stylesheet">

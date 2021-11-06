@@ -10,8 +10,8 @@ from utils import set_locale
 
 logger = logging.getLogger(__name__)
 
-RECORDINGS_BIN_FILENAME = "recordings.bin"
-RECORDINGS_LOG_FILENAME = "recordings.log"
+RECORDINGS_BIN_FILENAME = "data/recordings.bin"
+RECORDINGS_LOG_FILENAME = "logs/recordings.log"
 
 
 class Recordings:

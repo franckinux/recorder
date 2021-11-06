@@ -1,8 +1,10 @@
 *~
-tags
 channels.conf
 __pycache__
 *.ts
 *.log
 *.bin
 *.pdf
+data
+logs
+.venv

@@ -11,8 +11,8 @@ from utils import schedule_awakening
 
 logger = logging.getLogger(__name__)
 
-AWAKENINGS_BIN_FILENAME = "awakenings.bin"
-AWAKENINGS_LOG_FILENAME = "awakenings.log"
+AWAKENINGS_BIN_FILENAME = "data/awakenings.bin"
+AWAKENINGS_LOG_FILENAME = "logs/awakenings.log"
 
 
 class Awakenings:
