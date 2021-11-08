@@ -6,7 +6,7 @@ doc8==0.9.1
 docutils==0.18
 filelock==3.3.2
 flake8==4.0.1
-graphviz==0.17
+graphviz==0.18
 identify==2.3.4
 jedi==0.18.0
 mccabe==0.6.1
