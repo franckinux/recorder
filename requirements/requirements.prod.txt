@@ -1,4 +1,4 @@
-aiohttp==3.8.0
+aiohttp==3.8.1
 aiohttp-babel==0.0.6
 aiohttp-jinja2==1.5
 aiohttp-session==2.9.0
@@ -18,6 +18,6 @@ multidict==5.2.0
 pycparser==2.21
 pytz==2021.3
 speaklater==1.3
-typing-extensions==3.10.0.2
+typing_extensions==4.0.0
 WTForms==3.0.0
 yarl==1.7.2
