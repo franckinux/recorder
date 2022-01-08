@@ -1,5 +1,5 @@
 aiohttp==3.8.1
-aiohttp-babel==0.0.6
+git+git@github.com:jie/aiohttp_babel.git@master
 aiohttp-jinja2==1.5
 aiohttp-session==2.10.0
 aiohttp-session-flash==0.0.4
