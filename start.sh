@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-python3 main.py
+/home/franck/Documents/projets/python/recorder/.venv/bin/python main.py
