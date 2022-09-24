@@ -50,7 +50,7 @@ class Awakenings:
     def cancel_awakening(self, id_):
         if id_ in self.awakenings:
             logger.info(_("Suppression du réveil (id={})").format(id_))
-            del(self.awakenings[id_])
+            del self.awakenings[id_]
             self.setup_awakening()
 
     def setup_awakening(self):

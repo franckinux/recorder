@@ -64,7 +64,7 @@ async def startup(app):
 @aiohttp_jinja2.template("index.html")
 async def cancel_recording(request):
     id_ = int(request.match_info["id"])
-    request.app.recorder.cancel_recording(id_)
+    await request.app.recorder.cancel_recording(id_)
     return web.HTTPFound(request.app.router["index"].url_for())
 
 
@@ -155,8 +155,10 @@ class IndexView(web.View):
                     shutdown = data["shutdown"]
                     channel = self.channels_choices[data["channel"]][1]
                     program_name = data["program_name"]
-                    self.recorder.record(adapter, channel, program_name, immediate,
-                                         begin_date, end_date, duration, shutdown)
+                    await self.recorder.record(
+                        adapter, channel, program_name, immediate,
+                        begin_date, end_date, duration, shutdown
+                    )
                     message = _(
                         "L'enregistrement de \"{}\" est programmé "
                         "pour le {} à {} pendant {} minutes de \"{}\" "
