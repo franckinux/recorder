@@ -52,13 +52,13 @@ def setup_i18n(path, locale):
 
 
 async def cleanup(app):
-    app.recorder.save()
-    app.wakeup.save()
+    await app.recorder.save()
+    await app.wakeup.save()
 
 
 async def startup(app):
-    app.recorder.load()
-    app.wakeup.load()
+    await app.recorder.load()
+    await app.wakeup.load()
 
 
 @aiohttp_jinja2.template("index.html")

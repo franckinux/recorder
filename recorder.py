@@ -47,41 +47,63 @@ class Recordings:
         channels = [l.split(':', 1)[0] for l in lines]
         return channels
 
+    async def run(self, command: list, timeout: int):
+        try:
+            process = await asyncio.create_subprocess_exec(*command)
+            await asyncio.wait_for(process.wait(), timeout=timeout)
+        except asyncio.TimeoutError:
+            process.terminate()
+            await process.wait()
+
     async def record_program(
-        self, delay, adapter, channel, program_filename, duration, shutdown, id_
+        self, delay, adapter, channel, filename, duration, shutdown, id_
     ):
         await asyncio.sleep(delay)
 
-        logger.info(_("Enregistrement de {} (id={})").format(program_filename, id_))
+        logger.info(_("Enregistrement de {} (id={})").format(filename, id_))
+        self.recordings[id_]["recording"] = True
 
         if self.busy[adapter]:
             logger.warning(_("Enregistreur occupé (id={})").format(id_))
         else:
             self.busy[adapter] = True
 
-            cancelled = False
-            try:
-                if self.simulate:
-                    await asyncio.sleep(delay)
-                else:
-                    await asyncio.to_thread(
-                        f"/usr/bin/tzap -x -a {adapter} -r \"channel\""
-                    )
+            if self.simulate:
+                await asyncio.sleep(duration)
+            else:
+                zap = (
+                    "/usr/bin/tzap", "-S",
+                    "-c", f"{self.channels_conf}",
+                    "-a", f"{adapter}",
+                    "-r", f"{channel}"
+                )
 
-                    logger.debug(_("Début de l'enregistrement (id={})").format(id_))
-                    dev = "/etc/dvb/adapter{adapter}/dvr0"
-                    filename = op.join(self.recording_directory, program_filename)
-                    await asyncio.to_thread(f"cat {dev} > {filename}")
-                    logger.debug(_("Fin de l'enregistrement (id={})").format(id_))
-            except asyncio.CancelledError:
-                cancelled = True
+                filename = op.join(self.recording_directory, filename)
+                dd = (
+                    "/usr/bin/dd",
+                    f"if=/dev/dvb/adapter{adapter}/dvr0",
+                    f"of={filename}"
+                )
 
-            self.busy[adapter] = False
-            del self.recordings[id_]
+                logger.debug(_("Début de l'enregistrement (id={})").format(id_))
 
-            if shutdown and not cancelled:
+                await asyncio.gather(
+                    self.run(zap, duration),
+                    self.run(dd, duration)
+                )
+
+                self.busy[adapter] = False
+                del self.recordings[id_]
+                logger.debug(_("Fin de l'enregistrement (id={})").format(id_))
+
+            if shutdown:
                 logger.debug(_("Mise hors tension (id={})").format(id_))
-                await asyncio.to_thread("sudo shutdown -h now")
+                await asyncio.create_subprocess_shell(
+                    "sudo shutdown -h now",
+                    shell=True,
+                    stdout=asyncio.subprocess.DEVNULL,
+                    stderr=asyncio.subprocess.DEVNULL
+                )
 
     async def record(
         self, adapter, channel, program_name, immediate,
@@ -99,7 +121,7 @@ class Recordings:
             delay = 0
         else:
             delay = (begin_date - datetime.now()).total_seconds()
-        task = asyncio.create_task(
+        asyncio.create_task(
             self.record_program(
                 delay,
                 adapter,
@@ -112,14 +134,14 @@ class Recordings:
         )
 
         self.recordings[self.id] = {
-            "task": task,
             "channel": channel,
             "program_name": program_name,
             "begin_date": begin_date,
             "end_date": end_date,
             "adapter": adapter,
             "shutdown": shutdown,
-            "duration": duration
+            "duration": duration,
+            "recording": False
         }
         self.id += 1
 
@@ -129,27 +151,22 @@ class Recordings:
                 self.recordings[id_]["program_name"], id_)
             )
 
-            task = self.recordings[id_]["task"]
-            if task is not None:
-                task.cancel()
-                await task
+            if not self.recordings[id_]["recording"]:
                 del self.recordings[id_]
 
     @set_locale
-    def save(self):
+    async def save(self):
         """Saves the recordings from a file"""
         # only recordings not started
         recordings = dict(
-            filter(lambda e: e[1]["process"] is None, self.recordings.items())
+            filter(lambda e: not e[1]["recording"], self.recordings.items())
         )
-        for v in recordings.values():
-            v["handle"] = None
 
         with open(self.recordings_filename, "wb") as f:
             pickle.dump(recordings, f)
 
     @set_locale
-    def load(self):
+    async def load(self):
         """Loads the recordings from a file"""
 
         try:
@@ -165,10 +182,8 @@ class Recordings:
                 filter(lambda e: e[1]["begin_date"] > now, rec1.items())
             )
 
-            loop = asyncio.get_event_loop()
             for r in rec2.values():
-                loop.call(
-                    self.record,
+                await self.record(
                     r["adapter"],
                     r["channel"],
                     r["program_name"],

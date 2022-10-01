@@ -36,9 +36,9 @@ def set_locale(function):
     """This is a decorator that simulates babel middleware behavior. It is
     useful when the function is not executed in a request handler."""
 
-    def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs):
         _thread_locals.locale = locale.get(_language_code)
-        function(*args, **kwargs)
+        await function(*args, **kwargs)
 
     return wrapper
 

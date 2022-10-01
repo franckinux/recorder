@@ -76,13 +76,13 @@ class Awakenings:
             schedule_awakening(wut)
 
     @set_locale
-    def save(self):
+    async def save(self):
         """Saves the awakenings from a file"""
         with open(self.awakenings_filename, "wb") as f:
             pickle.dump(self.awakenings, f)
 
     @set_locale
-    def load(self):
+    async def load(self):
         """Loads the awakenings from a file"""
 
         # awakenings
