@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 import logging
-import os.path as op
+from path import Path
 import pickle
 
 from aiohttp_babel.middlewares import _
@@ -15,7 +15,7 @@ RECORDINGS_LOG_FILENAME = "logs/recordings.log"
 
 
 class Recordings:
-    def __init__(self, config, path):
+    def __init__(self, config, path: Path):
         self.max_duration = int(config.get("max_duration", "18000"))
         self.dvb_adapter_number = int(config.get("dvb_adapter_number", "1"))
         self.channels_conf = config.get("channels_conf", "/etc/channels.conf")
@@ -23,12 +23,12 @@ class Recordings:
         self.busy = [False] * self.dvb_adapter_number
         self.recordings = {}
         self.simulate = eval(config.get("simulate", "False"))
-        self.recordings_filename = op.join(path, RECORDINGS_BIN_FILENAME)
+        self.recordings_filename = path.joinpath(RECORDINGS_BIN_FILENAME)
 
         log_level = config.get("log_level", "INFO")
         log_level = getattr(logging, log_level)
 
-        log_filename = op.join(path, RECORDINGS_LOG_FILENAME)
+        log_filename = path.joinpath(RECORDINGS_LOG_FILENAME)
         logger.setLevel(log_level)
         file_handler = logging.FileHandler(log_filename)
         formatter = logging.Formatter("%(asctime)s - %(message)s")

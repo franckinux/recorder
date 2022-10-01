@@ -1,6 +1,6 @@
 import configparser
 import os
-import os.path as op
+from pathlib import Path
 import sys
 
 from aiohttp_babel import locale
@@ -43,8 +43,8 @@ def set_locale(function):
     return wrapper
 
 
-def read_configuration_file(path):
-    default_config_filename = op.join(path, "config.ini")
+def read_configuration_file(path: Path):
+    default_config_filename = path.joinpath("config.ini")
     config = configparser.ConfigParser()
     try:
         conf_filename = os.environ.get("RECORDER_CONFIG", default_config_filename)
@@ -58,8 +58,8 @@ def read_configuration_file(path):
     return config
 
 
-def write_configuration_file(path, config):
-    default_config_filename = op.join(path, "config.ini")
+def write_configuration_file(path: Path, config):
+    default_config_filename = path.joinpath("config.ini")
     conf_filename = os.environ.get("RECORDER_CONFIG", default_config_filename)
 
     with open(conf_filename, "w") as f:

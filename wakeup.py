@@ -1,6 +1,6 @@
 from datetime import datetime
 import logging
-import os.path as op
+from pathlib import Path
 import pickle
 
 from aiohttp_babel.middlewares import _
@@ -17,14 +17,14 @@ AWAKENINGS_LOG_FILENAME = "logs/awakenings.log"
 
 class Awakenings:
 
-    def __init__(self, config, path):
+    def __init__(self, config, path: Path):
         self.awakenings = {}
-        self.awakenings_filename = op.join(path, AWAKENINGS_BIN_FILENAME)
+        self.awakenings_filename = path.joinpath(AWAKENINGS_BIN_FILENAME)
 
         log_level = config.get("log_level", "INFO")
         log_level = getattr(logging, log_level)
 
-        log_filename = op.join(path, AWAKENINGS_LOG_FILENAME)
+        log_filename = path.joinpath(AWAKENINGS_LOG_FILENAME)
         logger.setLevel(log_level)
         file_handler = logging.FileHandler(log_filename)
         formatter = logging.Formatter("%(asctime)s - %(message)s")

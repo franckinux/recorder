@@ -1,6 +1,6 @@
 from datetime import datetime
 from functools import partial
-import os.path as op
+from pathlib import Path
 
 from aiohttp import web
 from aiohttp_babel.locale import load_gettext_translations
@@ -42,9 +42,9 @@ def locale_detector(request, locale):
     return locale
 
 
-def setup_i18n(path, locale):
+def setup_i18n(path: Path, locale):
     set_default_locale(DEFAULT_LANGUAGE)
-    locales_dir = op.join(path, "locales", "translations")
+    locales_dir = path.joinpath("locales", "translations")
     load_gettext_translations(locales_dir, "messages")
 
     partial_locale_detector = partial(locale_detector, locale=locale)
@@ -214,7 +214,7 @@ class IndexView(web.View):
 
 
 if __name__ == "__main__":
-    path = op.dirname(op.abspath(__file__))
+    path = Path(__file__).resolve().parent
 
     config = read_configuration_file(path)
 
@@ -230,7 +230,7 @@ if __name__ == "__main__":
     session_setup(app, SimpleCookieStorage())
     app.middlewares.append(aiohttp_session_flash.middleware)
 
-    template_dir = op.join(path, "templates")
+    template_dir = path.pathjoin("templates")
     aiohttp_jinja2.setup(
         app,
         loader=FileSystemLoader(template_dir),
@@ -247,7 +247,7 @@ if __name__ == "__main__":
                        name="cancel_awakening")
 
     app.router.add_routes(routes)
-    static_dir = op.join(op.dirname(op.abspath(__file__)), "static")
+    static_dir = path.joinpath("static")
     app.router.add_static("/static", static_dir)
 
     app.on_startup.append(startup)
