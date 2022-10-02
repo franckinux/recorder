@@ -47,7 +47,7 @@ class Recordings:
         channels = [l.split(':', 1)[0] for l in lines]
         return channels
 
-    async def run(self, command: list, timeout: int):
+    async def run(self, command: tuple, timeout: int):
         try:
             process = await asyncio.create_subprocess_exec(*command)
             await asyncio.wait_for(process.wait(), timeout=timeout)
@@ -56,7 +56,7 @@ class Recordings:
             await process.wait()
 
     async def record_program(
-        self, delay, adapter, channel, filename, duration, shutdown, id_
+        self, delay, adapter, channel, filename: str, duration, shutdown, id_
     ):
         await asyncio.sleep(delay)
 
@@ -78,7 +78,7 @@ class Recordings:
                     "-r", f"{channel}"
                 )
 
-                filename = op.join(self.recording_directory, filename)
+                filename = self.recording_directory.joinpath(filename)
                 dd = (
                     "/usr/bin/dd",
                     f"if=/dev/dvb/adapter{adapter}/dvr0",

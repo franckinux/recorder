@@ -77,7 +77,7 @@ class Awakenings:
 
     @set_locale
     async def save(self):
-        """Saves the awakenings from a file"""
+        """Saves the awakenings to a file"""
         with open(self.awakenings_filename, "wb") as f:
             pickle.dump(self.awakenings, f)
 
