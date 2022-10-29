@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 import logging
-from path import Path
+from pathlib import Path
 import pickle
 
 from aiohttp_babel.middlewares import _
@@ -23,12 +23,12 @@ class Recordings:
         self.busy = [False] * self.dvb_adapter_number
         self.recordings = {}
         self.simulate = eval(config.get("simulate", "False"))
-        self.recordings_filename = path.joinpath(RECORDINGS_BIN_FILENAME)
+        self.recordings_filename = Path(path, RECORDINGS_BIN_FILENAME)
 
         log_level = config.get("log_level", "INFO")
         log_level = getattr(logging, log_level)
 
-        log_filename = path.joinpath(RECORDINGS_LOG_FILENAME)
+        log_filename = Path(path, RECORDINGS_LOG_FILENAME)
         logger.setLevel(log_level)
         file_handler = logging.FileHandler(log_filename)
         formatter = logging.Formatter("%(asctime)s - %(message)s")
@@ -78,7 +78,7 @@ class Recordings:
                     "-r", f"{channel}"
                 )
 
-                filename = self.recording_directory.joinpath(filename)
+                filename = Path(self.recording_directory, filename)
                 dd = (
                     "/usr/bin/dd",
                     f"if=/dev/dvb/adapter{adapter}/dvr0",

@@ -44,7 +44,7 @@ def locale_detector(request, locale):
 
 def setup_i18n(path: Path, locale):
     set_default_locale(DEFAULT_LANGUAGE)
-    locales_dir = path.joinpath("locales", "translations")
+    locales_dir = Path(path, "locales", "translations")
     load_gettext_translations(locales_dir, "messages")
 
     partial_locale_detector = partial(locale_detector, locale=locale)
@@ -230,7 +230,7 @@ if __name__ == "__main__":
     session_setup(app, SimpleCookieStorage())
     app.middlewares.append(aiohttp_session_flash.middleware)
 
-    template_dir = path.pathjoin("templates")
+    template_dir = Path(path, "templates")
     aiohttp_jinja2.setup(
         app,
         loader=FileSystemLoader(template_dir),
@@ -247,7 +247,7 @@ if __name__ == "__main__":
                        name="cancel_awakening")
 
     app.router.add_routes(routes)
-    static_dir = path.joinpath("static")
+    static_dir = Path(path, "static")
     app.router.add_static("/static", static_dir)
 
     app.on_startup.append(startup)

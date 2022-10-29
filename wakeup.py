@@ -19,12 +19,12 @@ class Awakenings:
 
     def __init__(self, config, path: Path):
         self.awakenings = {}
-        self.awakenings_filename = path.joinpath(AWAKENINGS_BIN_FILENAME)
+        self.awakenings_filename = Path(path, AWAKENINGS_BIN_FILENAME)
 
         log_level = config.get("log_level", "INFO")
         log_level = getattr(logging, log_level)
 
-        log_filename = path.joinpath(AWAKENINGS_LOG_FILENAME)
+        log_filename = Path(path, AWAKENINGS_LOG_FILENAME)
         logger.setLevel(log_level)
         file_handler = logging.FileHandler(log_filename)
         formatter = logging.Formatter("%(asctime)s - %(message)s")

@@ -44,7 +44,7 @@ def set_locale(function):
 
 
 def read_configuration_file(path: Path):
-    default_config_filename = path.joinpath("config.ini")
+    default_config_filename = Path(path, "config.ini")
     config = configparser.ConfigParser()
     try:
         conf_filename = os.environ.get("RECORDER_CONFIG", default_config_filename)
@@ -59,7 +59,7 @@ def read_configuration_file(path: Path):
 
 
 def write_configuration_file(path: Path, config):
-    default_config_filename = path.joinpath("config.ini")
+    default_config_filename = Path(path, "config.ini")
     conf_filename = os.environ.get("RECORDER_CONFIG", default_config_filename)
 
     with open(conf_filename, "w") as f:
