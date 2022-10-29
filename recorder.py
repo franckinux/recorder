@@ -47,10 +47,13 @@ class Recordings:
         channels = [l.split(':', 1)[0] for l in lines]
         return channels
 
-    async def run(self, command: tuple, timeout: int):
+    async def run(self, command: tuple, timeout: int = 0):
         try:
             process = await asyncio.create_subprocess_exec(*command)
-            await asyncio.wait_for(process.wait(), timeout=timeout)
+            if timeout == 0:
+                await process.wait()
+            else:
+                await asyncio.wait_for(process.wait(), timeout=timeout)
         except asyncio.TimeoutError:
             process.terminate()
             await process.wait()
@@ -71,30 +74,24 @@ class Recordings:
             if self.simulate:
                 await asyncio.sleep(duration)
             else:
-                zap = (
-                    "/usr/bin/tzap", "-S",
-                    "-c", f"{self.channels_conf}",
-                    "-a", f"{adapter}",
-                    "-r", f"{channel}"
-                )
-
-                filename = Path(self.recording_directory, filename)
-                dd = (
-                    "/usr/bin/dd",
-                    f"if=/dev/dvb/adapter{adapter}/dvr0",
-                    f"of={filename}"
-                )
-
                 logger.debug(_("Début de l'enregistrement (id={})").format(id_))
 
-                await asyncio.gather(
-                    self.run(zap, duration),
-                    self.run(dd, duration)
+                filename = Path(self.recording_directory, filename)
+                command = (
+                    "/usr/bin/dvbv5-zap",
+                    "-a", f"{adapter}",
+                    "-I", "zap",
+                    "-o", f"{filename}",
+                    "-c", f"{self.channels_conf}",
+                    "-t", f"{duration}",
+                    f"{channel}"
                 )
+                await self.run(command)
 
-                self.busy[adapter] = False
-                del self.recordings[id_]
                 logger.debug(_("Fin de l'enregistrement (id={})").format(id_))
+
+            self.busy[adapter] = False
+            del self.recordings[id_]
 
             if shutdown:
                 logger.debug(_("Mise hors tension (id={})").format(id_))

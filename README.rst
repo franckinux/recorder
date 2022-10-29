@@ -1,7 +1,7 @@
 Version
 =======
 
-0.6.3
+0.7.0
 
 Presentation
 ============
@@ -33,6 +33,26 @@ Screenshots
 .. image:: images/awakenings.png
 .. image:: images/tools.png
 
+
+Preparation
+==========
+
+Generation of the initial file :
+
+- get the channels numbers ;
+- insert them in the script `tools/make-channels-conf.sh`
+- execute the script :
+
+.. code_block::
+
+    tools/make-channels-conf.sh > transmitters/xx-place.conf
+
+Generation of the channels configuration file :
+
+.. code_block::
+
+   cd transmitters
+   dvbv5-scan -F -I channel -O zap -o channels-place.conf xx-place.conf
 
 Downloads
 =========
