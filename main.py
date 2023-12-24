@@ -76,7 +76,6 @@ async def cancel_awakening(request):
 
 
 @routes.view("/", name="index")
-@aiohttp_jinja2.template("index.html")
 class IndexView(web.View):
 
     class RecordingForm(Form):
@@ -119,9 +118,12 @@ class IndexView(web.View):
         super().__init__(request)
         self.recorder = request.app.recorder
         self.wakeup = request.app.wakeup
-        self.adapters_choices = [(i, str(i)) for i in range(self.recorder.dvb_adapter_number)]
+        self.adapters_choices = [
+            (i, str(i)) for i in range(self.recorder.dvb_adapter_number)
+        ]
         self.channels_choices = list(enumerate(self.recorder.get_channels()))
 
+    @aiohttp_jinja2.template("index.html")
     async def post(self):
         form = self.RecordingForm(await self.request.post())
         form.adapter.choices = self.adapters_choices
@@ -198,6 +200,7 @@ class IndexView(web.View):
             "form3": form3
         }
 
+    @aiohttp_jinja2.template("index.html")
     async def get(self,):
         form = self.RecordingForm()
         form.adapter.choices = self.adapters_choices
@@ -241,10 +244,12 @@ if __name__ == "__main__":
     jinja2_env = aiohttp_jinja2.get_env(app)
     jinja2_env.globals['_'] = _
 
-    app.router.add_get("/recording/cancel/{id:\d+}/", cancel_recording,
-                       name="cancel_recording")
-    app.router.add_get("/wakeup/cancel/{id:\d+}/", cancel_awakening,
-                       name="cancel_awakening")
+    app.router.add_get(
+        "/recording/cancel/{id:\d+}/", cancel_recording, name="cancel_recording"
+    )
+    app.router.add_get(
+        "/wakeup/cancel/{id:\d+}/", cancel_awakening, name="cancel_awakening"
+    )
 
     app.router.add_routes(routes)
     static_dir = Path(path, "static")
