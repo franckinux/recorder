@@ -1,6 +1,10 @@
+import argparse
+import asyncio
 from datetime import datetime
 from functools import partial
+import logging
 from pathlib import Path
+import sys
 
 from aiohttp import web
 from aiohttp_babel.locale import load_gettext_translations
@@ -24,18 +28,29 @@ from wtforms.validators import Length
 from wtforms.validators import DataRequired
 from wtforms.validators import Optional
 
-from error import error_middleware
-from recorder import Recordings
-from utils import _l
-from utils import read_configuration_file
-from utils import remove_special_data
-from utils import set_language
-from utils import halt
-from wakeup import Awakenings
+import recorder.config as config
+from recorder.error import error_middleware
+from recorder.record import Recorder
+from recorder.utils import _l
+from recorder.utils import remove_special_data
+from recorder.utils import set_language
+from recorder.utils import halt
+from recorder.wakeup import Awakenings
+
+DEFAULT_LANGUAGE = "fr"
 
 routes = web.RouteTableDef()
 
-DEFAULT_LANGUAGE = "fr"
+record = None
+wakeup = None
+path = None
+
+logger = logging.getLogger()
+handler = logging.StreamHandler(stream=sys.stdout)
+formatter = logging.Formatter("%(asctime)s %(module)s %(levelname)s %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 
 def locale_detector(request, locale):
@@ -51,20 +66,42 @@ def setup_i18n(path: Path, locale):
     set_locale_detector(partial_locale_detector)
 
 
-async def cleanup(app):
-    await app.recorder.save()
-    await app.wakeup.save()
+async def init():
+    global path
+    global record
+    global wakeup
+
+    path = Path(__file__).resolve().parent.parent
+
+    logging.getLogger("aiohttp").setLevel(logging.WARNING)
+
+    # set log level of modules' loggers
+    for lg_name, lg_level in config.loggers.items():
+        if lg_name == "root":
+            logger.setLevel(lg_level)
+        else:
+            module = sys.modules[lg_name]
+            module_logger = getattr(module, "logger")
+            module_logger.setLevel(lg_level)
+
+    record = Recorder(path)
+    wakeup = Awakenings(path)
+
+    await record.load()
+    await wakeup.load()
 
 
-async def startup(app):
-    await app.recorder.load()
-    await app.wakeup.load()
+async def close():
+    await record.cancel_recordings()
+
+    await record.save()
+    await wakeup.save()
 
 
 @aiohttp_jinja2.template("index.html")
 async def cancel_recording(request):
     id_ = int(request.match_info["id"])
-    await request.app.recorder.cancel_recording(id_)
+    await request.app.record.cancel_recording(id_)
     return web.HTTPFound(request.app.router["index"].url_for())
 
 
@@ -116,7 +153,7 @@ class IndexView(web.View):
 
     def __init__(self, request):
         super().__init__(request)
-        self.recorder = request.app.recorder
+        self.recorder = request.app.record
         self.wakeup = request.app.wakeup
         self.adapters_choices = [
             (i, str(i)) for i in range(self.recorder.dvb_adapter_number)
@@ -216,19 +253,16 @@ class IndexView(web.View):
         }
 
 
-if __name__ == "__main__":
-    path = Path(__file__).resolve().parent
-
-    config = read_configuration_file(path)
-
-    lang = config["recorder"].get("language", DEFAULT_LANGUAGE)
+async def make_app():
+    # run a server
+    lang = config.general.language
     set_language(lang)
     setup_i18n(path, lang)
 
     app = web.Application(middlewares=[error_middleware, babel_middleware])
 
-    app.recorder = Recordings(config["recorder"], path)
-    app.wakeup = Awakenings(config["wakeup"], path)
+    app.record = record
+    app.wakeup = wakeup
 
     session_setup(app, SimpleCookieStorage())
     app.middlewares.append(aiohttp_session_flash.middleware)
@@ -255,7 +289,52 @@ if __name__ == "__main__":
     static_dir = Path(path, "static")
     app.router.add_static("/static", static_dir)
 
-    app.on_startup.append(startup)
-    app.on_cleanup.append(cleanup)
+    # cors = aiohttp_cors.setup(app, defaults={
+    #     "*": aiohttp_cors.ResourceOptions(
+    #         allow_credentials=True,
+    #         expose_headers="*",
+    #         allow_headers="*",
+    #     )
+    # })
+    #
+    # # Configure CORS on all routes.
+    # for route in list(app.router.routes()):
+    #     cors.add(route)
 
-    web.run_app(app, port=int(config["network"]["port"]))
+    return app
+
+
+async def run(config_filename: str):
+    config.read(config_filename)
+
+    await init()
+
+    app = await make_app()
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", config.general.port)
+    await site.start()
+    while True:
+        await asyncio.sleep(1)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", default="config.toml")
+    args = parser.parse_args()
+
+    loop = asyncio.get_event_loop()
+    try:
+        logger.info("server started")
+        loop.run_until_complete(run(args.config))
+    except KeyboardInterrupt:
+        pass
+    finally:
+        loop.run_until_complete(close())
+        loop.stop()
+        logger.info("server stopped")
+
+
+if __name__ == "__main__":
+    main()

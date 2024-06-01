@@ -5,31 +5,20 @@ import pickle
 
 from aiohttp_babel.middlewares import _
 
-from utils import set_locale
-from utils import cancel_awakening
-from utils import schedule_awakening
+from recorder.utils import set_locale
+from recorder.utils import cancel_awakening
+from recorder.utils import schedule_awakening
 
 logger = logging.getLogger(__name__)
 
 AWAKENINGS_BIN_FILENAME = "data/awakenings.bin"
-AWAKENINGS_LOG_FILENAME = "logs/awakenings.log"
 
 
 class Awakenings:
 
-    def __init__(self, config, path: Path):
+    def __init__(self, path: Path):
         self.awakenings = {}
         self.awakenings_filename = Path(path, AWAKENINGS_BIN_FILENAME)
-
-        log_level = config.get("log_level", "INFO")
-        log_level = getattr(logging, log_level)
-
-        log_filename = Path(path, AWAKENINGS_LOG_FILENAME)
-        logger.setLevel(log_level)
-        file_handler = logging.FileHandler(log_filename)
-        formatter = logging.Formatter("%(asctime)s - %(message)s")
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
 
         self.id = 1
 

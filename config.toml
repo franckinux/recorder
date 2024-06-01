@@ -1,0 +1,19 @@
+[general]
+dvb_adapter_number = 2
+channels_conf = "/home/franck/Documents/projets/multimedia/recorder/transmitters/channels-lescars.conf"
+max_duration = 18000
+recording_directory = "/home/franck/Vidéos/_enregistrements"
+language = "en"
+simulate = false
+port = 8080
+
+[[logger]]
+
+[logger.root]
+level = "DEBUG"
+
+[logger.recorder.record]
+level = "DEBUG"
+
+[logger.recorder.wakeup]
+level = "INFO"
