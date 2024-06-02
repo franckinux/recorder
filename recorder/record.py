@@ -78,12 +78,13 @@ class Recorder:
         logger.debug(f"process return code: {process.returncode}")
         logger.debug(_("Fin de l'enregistrement (id={})").format(id_))
 
-        if process.returncode < 0 and not self.simulate:
-            logger.debug(f"delete file {record_filename.name}")
-            record_filename.unlink()
-
         self.busy[adapter] = False
         del self.recordings[id_]
+
+        if process.returncode != 0 and not self.simulate:
+            logger.debug(f"delete file {record_filename.name}")
+            record_filename.unlink()
+            return
 
         if shutdown:
             logger.debug(_("Mise hors tension (id={})").format(id_))
@@ -147,18 +148,17 @@ class Recorder:
                 process.terminate()
             else:
                 self.recordings[id_]["task"].cancel()
-                await self.recordings[id_]["task"]
+            await self.recordings[id_]["task"]
 
     async def cancel_recordings(self):
-        for record in self.recordings.values():
+        for id_ in list(self.recordings.keys()):
+            record = self.recordings[id_]
             process = record["process"]
             if process is not None:
                 process.terminate()
             else:
                 record["task"].cancel()
-                await record["task"]
-            record["task"] = None
-            record["process"] = None
+            await record["task"]
 
     @set_locale
     async def save(self):

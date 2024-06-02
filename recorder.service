@@ -6,6 +6,8 @@ StartLimitBurst=5
 [Service]
 WorkingDirectory=/home/franck/Documents/projets/multimedia/recorder
 ExecStart=/home/franck/Documents/projets/multimedia/recorder/start.sh
+Environment=PYTHONPATH=/home/franck/Documents/projets/multimedia/recorder
+KillSignal=SIGINT
 User=franck
 Group=franck
 Restart=on-failure
